@@ -1,3 +1,7 @@
+.vscode/
 *.make
 bin/
 bin-int/
+
+# JPorta biztosítja
+#src/tests/gtest_lite.h

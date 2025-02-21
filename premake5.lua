@@ -21,7 +21,8 @@ project "pingforce"
     }
 
     includedirs {
-        "include"
+        "include",
+        "." -- memtrace.h, gtest_lite.h miatt
     }
 
     externalincludedirs {
@@ -64,13 +65,13 @@ project "pingforce"
         warnings "Everything"
         externalwarnings "Off"
         disablewarnings {
-            "unused-parameter",
-            "unused-macros",
-            "newline-eof",
-            "padded",
-            "switch-enum",
-            "gnu-zero-variadic-macro-arguments",
-            "declaration-after-statement",
+            -- "unused-parameter",
+            -- "unused-macros",
+            -- "newline-eof",
+            -- "padded",
+            -- "switch-enum",
+            -- "gnu-zero-variadic-macro-arguments",
+            -- "declaration-after-statement",
             "c++98-compat",
             "c++98-compat-pedantic"
         }
