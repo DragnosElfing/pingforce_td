@@ -1,5 +1,7 @@
 #pragma once
 
 namespace pftd {
-    class Projectile {};
+    
+class Projectile {};
+
 }

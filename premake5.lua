@@ -5,24 +5,24 @@ workspace "PingForce_TD"
         "Debug"
     }
 
-project "pingforce"
-    kind "WindowedApp"
     language "C++"
-    cppdialect "c++20"
+    cppdialect "c++17"
     toolset "clang"
     targetdir "./bin/%{prj.name}_%{cfg.buildcfg}"
-    targetname "pingforce"
     objdir "./bin-int"
 
+project "pingforce"
+    kind "WindowedApp"
+    targetname "pingforce"
+
     files {
-        "src/utils/*.cpp",
-        "src/objects/*.cpp",
-        "src/main.cpp"
+        "src/scenes/**.cpp",
+        "src/gui/*.cpp",
+        "src/*.cpp"
     }
 
     includedirs {
-        "include",
-        "." -- memtrace.h, gtest_lite.h miatt
+        "include"
     }
 
     externalincludedirs {
@@ -33,7 +33,6 @@ project "pingforce"
         "external/**/lib"
     }
 
-    
     filter {"system:linux", "action:gmake"}
         links {
             "sfml-window-s",
@@ -50,34 +49,47 @@ project "pingforce"
             "pthread"
         }
 
-        buildoptions {
-            "-pedantic",
-            "-gdwarf-4"
-        }
+        filter "configurations:Debug"
+            symbols "On"
+            defines {
+                "_PFTD_DEBUG"
+            }
+
+            buildoptions {
+                "-pedantic",
+                "-gdwarf-4"
+            }
+            
+            flags {
+                "FatalWarnings"
+            }
+            
+            warnings "Extra" -- -Wall -Wextra
+            externalwarnings "Off"
+            
+        filter "configurations:Release"
+            optimize "On"
+            
+            warnings "Off"
+            externalwarnings "Off"
 
 
-    filter "configurations:Debug"
+project "pingforce_test"
+    kind "ConsoleApp"
+    targetname "test"
+
+    files {
+        "test/tests.cpp"
+    }
+
+    externalincludedirs {
+        "test",
+        "include",
+        "." -- memtrace.h és gtest_lite.h miatt, amit a JPorta szúr be
+    }
+
+    filter {"system:linux", "action:gmake"}
         symbols "On"
-        defines {
-            "_DEBUG"
-        }
-
-        warnings "Everything"
-        externalwarnings "Off"
-        disablewarnings {
-            -- "unused-parameter",
-            -- "unused-macros",
-            -- "newline-eof",
-            -- "padded",
-            -- "switch-enum",
-            -- "gnu-zero-variadic-macro-arguments",
-            -- "declaration-after-statement",
-            "c++98-compat",
-            "c++98-compat-pedantic"
-        }
-
-    filter "configurations:Release"
-        optimize "On"
-
-        warnings "Off"
+        optimize "Off"
+        warnings "Extra"
         externalwarnings "Off"

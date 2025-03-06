@@ -1,20 +1,31 @@
-#include "SFML/Graphics.hpp"
-#include "SFML/Graphics/RenderWindow.hpp"
-#include "SFML/Window/WindowEnums.hpp"
+#include "app.hpp"
+#include "scenes/menu.hpp"
+#include "scenes/game.hpp"
+
+#ifdef MEMTRACE
+    #include "memtrace.h"
+#endif
+
+using namespace pftd;
 
 int main()
 {
-    sf::RenderWindow window {sf::VideoMode{{300, 300}}, "PingForce TD", sf::Style::Default, sf::State::Windowed};
-    window.setFramerateLimit(60);
+    // App létrehozása (`App::destroy()`-t a legvégén meg kell hívni)
+    App::create(500, 300, "PingForce TD");
 
-    auto const closeEvent = [&window](sf::Event::Closed const&){
-        window.close();
-    };
-
-    while(window.isOpen()) {
-        window.handleEvents(closeEvent);
-        window.display();
-    }
+    // Ne kelljen olyan sokat írni
+    auto instance = App::getInstance();
+    auto resourceManager = instance->getResourceManager();
+    
+    // Nézetek hozzáadása (ezáltal könnyen lehet további nézeteket is létrehozni/hozzáadni)
+    instance->addScene("menu", new MenuScene(*resourceManager), true);
+    instance->addScene("game", new GameScene(*resourceManager));
+    
+    // Futtatás
+    instance->run();
+    
+    // App törlése
+    instance->destroy();
 
     return 0;
 }
