@@ -14,7 +14,8 @@ public:
     bool isActive;
 
     //template<typename CallbackF>
-    Button(sf::Text&&, sf::FloatRect&&, bool active = true);
+    // TODO: take in position and size instead of a rect
+    Button(sf::Text&&, sf::FloatRect&&, bool active = true, int yIndex = 0);
 
     virtual ~Button();
 

@@ -4,6 +4,7 @@
 #include "SFML/Graphics/Rect.hpp"
 #include "SFML/Graphics/RenderTarget.hpp"
 
+#include "objects/gui/image.hpp"
 #include "resources.hpp"
 #include "scene.hpp"
 #include "objects/gui/button.hpp"
@@ -14,17 +15,16 @@ namespace pftd
 class MenuScene final : public Scene
 {
 public:
-
-    MenuScene(ResourceManager&);
+    MenuScene();
     ~MenuScene();
 
     void onEvent(sf::Event const&) override;
 
 private:
-    // sf::Sprite m_logo;
-    // sf::Sprite m_background;
+    gui::Image m_logo;
+    gui::Image m_background;
     gui::Button m_newGameButt;
-    // gui::Button m_loadGameButt;
+    gui::Button m_loadGameButt;
 };
 
 }

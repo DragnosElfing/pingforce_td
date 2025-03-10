@@ -9,9 +9,10 @@
 using namespace pftd;
 
 /// Renderer
-Renderer::Renderer(unsigned int width, unsigned int height, std::string const& title)
+Renderer::Renderer(unsigned int width, unsigned int height, std::string const& title):
+    m_width{width}, m_height{height}
 {
-    m_window = new sf::RenderWindow{sf::VideoMode{{width, height}}, 
+    m_window = new sf::RenderWindow{sf::VideoMode{{m_width, m_height}}, 
         title, sf::Style::Default, sf::State::Windowed};
 }
 
@@ -26,9 +27,10 @@ void Renderer::render()
     
     while(!m_queue.empty()) {
         auto& obj = m_queue.top();
-        m_queue.pop();
-
+        
         obj->draw(*m_window, {});
+        
+        m_queue.pop();
     }
 
     this->display();
@@ -40,7 +42,7 @@ App::~App()
     m_running = false;
     // Muszáj kondícionálisan, mert lehet (valójában biztos hogy nem, de meh) hogy sose volt meghívva az App::create
     if(m_renderer) delete m_renderer;
-    if(m_resManager) delete m_resManager;
+    ResourceManager::destroy();
     for(auto& [_, scene] : m_scenes) {
         delete scene;
     }
@@ -60,8 +62,8 @@ App* App::create(unsigned int width, unsigned int height, std::string const& tit
     
     I->m_renderer = new Renderer{width, height, title};
 
-    I->m_resManager = new ResourceManager{};
-    if(!I->m_resManager->loadDefaultFont("res/fonts/Gorditas/Gorditas-Bold.ttf")) {
+    ResourceManager::create();
+    if(!ResourceManager::getInstance()->loadDefaultFont("res/fonts/Gorditas/Gorditas-Bold.ttf")) {
         throw "Nem lehetett megnyitni a betűtípust!";
     }
 

@@ -1,8 +1,10 @@
 .vscode/
-*.make
-Makefile
 bin/
 bin-int/
+./**/.nvimlog
+
+*.make
+Makefile
 
 # JPorta biztosítja
 #src/tests/gtest_lite.h

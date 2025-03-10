@@ -12,9 +12,9 @@ namespace pftd {
 class Scene 
 {
 public:
-    unsigned int id = 0;
-
-    Scene(ResourceManager&);
+    Scene() = default;
+    Scene(Scene const&) = default;
+    Scene(Scene&&) noexcept = default;
     virtual ~Scene() = default;
 
     std::vector<Object*> getObjects() const { return objects; }
@@ -22,7 +22,6 @@ public:
     
 protected:
     std::vector<Object*> objects;
-    ResourceManager& resManager;
 };
 
 }

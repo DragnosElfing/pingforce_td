@@ -29,6 +29,8 @@ public:
     sf::RenderWindow* getWindow() const { return m_window; }
 private:
     sf::RenderWindow* m_window = nullptr;
+    unsigned int m_width;
+    unsigned int m_height;
     std::priority_queue<Object const*, std::vector<Object const*>, Object::Compare> m_queue;
 };
 
@@ -43,8 +45,10 @@ public:
     void addScene(std::string id, Scene* scene, bool active = false);
     [[maybe_unused]]
     bool changeScene(std::string id);
-    bool isRunning() const { return this->m_running; }
-    ResourceManager* getResourceManager() const { return this->m_resManager; }
+    auto isRunning() const { return this->m_running; }
+    auto getResourceManager() const { return this->m_resManager; }
+    int getWindowWidth() const { return this->m_renderer->m_width; }
+    int getWindowHeight() const { return this->m_renderer->m_height; }
 
     App& operator=(App const&) = delete;
     
