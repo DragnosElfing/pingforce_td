@@ -22,6 +22,25 @@ ResourceManager* ResourceManager::create()
 
 bool ResourceManager::loadDefaultFont(std::string const& path)
 {
-    where();
     return defaultFont.openFromFile(path);
+}
+
+bool ResourceManager::addTextureToRepo(std::string const& source, std::string const& id)
+{
+    if(m_textures.find(id) != m_textures.end()) {
+        return false;
+    }
+    
+    m_textures[id] = sf::Texture{sf::Image{source}};
+
+    return true;
+}
+
+sf::Texture const* ResourceManager::getTextureFromRepo(std::string const& id) const
+{
+    if(m_textures.find(id) != m_textures.end()) {
+        return &m_textures.at(id);
+    }
+
+    return nullptr;
 }

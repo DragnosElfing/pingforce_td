@@ -66,6 +66,10 @@ project "pingforce"
             
             warnings "Extra" -- -Wall -Wextra
             externalwarnings "Off"
+
+            disablewarnings {
+                "unused-lambda-capture"
+            }
             
         filter "configurations:Release"
             optimize "On"

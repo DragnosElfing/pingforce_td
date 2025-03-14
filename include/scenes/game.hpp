@@ -4,6 +4,7 @@
 #include "SFML/System/Vector2.hpp"
 
 #include "objects/gui/image.hpp"
+#include "objects/gui/button.hpp"
 #include "resources.hpp"
 #include "scene.hpp"
 
@@ -19,8 +20,9 @@ public:
     void onEvent(sf::Event const& ev) override;
 
 private:
-    gui::Image m_testImage;
-
+    gui::Image m_mapBackground;
+    gui::Image m_inventoryBackground;
+    gui::Button m_saveButt;
 };
 
 }

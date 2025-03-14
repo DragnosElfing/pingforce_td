@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <stdexcept>
 
 #include "app.hpp"
@@ -65,6 +66,10 @@ App* App::create(unsigned int width, unsigned int height, std::string const& tit
     ResourceManager::create();
     if(!ResourceManager::getInstance()->loadDefaultFont("res/fonts/Gorditas/Gorditas-Bold.ttf")) {
         throw "Nem lehetett megnyitni a betűtípust!";
+    }
+    print(std::filesystem::absolute(std::filesystem::path{"res/images/button_bg.png"}));
+    if(!ResourceManager::getInstance()->addTextureToRepo("./res/images/button_bg.png", "button_bg")) {
+        throw "Hiba történt a `res/images/button_bg.png` kép betöltése közben!";
     }
 
     I->m_running = true;

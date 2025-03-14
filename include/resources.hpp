@@ -1,7 +1,10 @@
 #pragma once
 
-#include "SFML/Graphics/Font.hpp"
 #include <unordered_map>
+
+#include "SFML/Graphics/Font.hpp"
+
+#include "objects/gui/image.hpp"
 
 namespace pftd {
 
@@ -16,9 +19,9 @@ public:
 
     [[maybe_unused]]
     bool loadDefaultFont(std::string const&);
-    // [[maybe_unused]]
-    // bool addImageToRepo(std::string const&, std::string const&) const;
-    // sf::Image const getImageFromRepo(std::string const&);
+    [[maybe_unused]]
+    bool addTextureToRepo(std::string const&, std::string const&);
+    sf::Texture const* getTextureFromRepo(std::string const&) const;
 
     [[nodiscard]]
     static ResourceManager* getInstance() { return m_instance; }
@@ -29,7 +32,7 @@ public:
 private:
     ResourceManager() = default;
 
-    //std::unordered_map<std::string, sf::Image> m_images;
+    std::unordered_map<std::string, sf::Texture> m_textures; // TODO: store absolute pathes instead of id's
     
     static ResourceManager* m_instance;
 };

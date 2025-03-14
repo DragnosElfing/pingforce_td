@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "SFML/Graphics.hpp"
+#include "objects/gui/image.hpp"
 #include "objects/object_base.hpp"
 
 namespace pftd {
@@ -21,6 +22,7 @@ public:
 
     // template<typename CallbackF>
     void setCallback(std::function<void()>);
+    void setBackground(std::string const&);
 
     std::string getLabel() const { return static_cast<std::string>(m_label.getString()); };
 
@@ -30,6 +32,7 @@ public:
 private:
     sf::Text m_label;
     sf::FloatRect m_rect;
+    Image* m_background = nullptr;
     std::function<void()> m_callback;
 };
 
