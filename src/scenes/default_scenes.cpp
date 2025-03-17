@@ -10,16 +10,22 @@ using namespace pftd;
 /// Menu
 MenuScene::MenuScene():
     m_logo{"res/images/logo.png", 
-        {App::getInstance()->getWindowWidth()/2 - 480 + 24, App::getInstance()->getWindowHeight()/2 - 320}, {960 - 48, 380}},
+        {50, App::getInstance()->getWindowHeight()/2 - 360}, 
+        {620, 620}},
 
     m_background{"res/images/menu_bg.jpeg", 
-        {0, 0}, {App::getInstance()->getWindowWidth(), App::getInstance()->getWindowHeight()}, -100},
+        {0, 0}, 
+        {App::getInstance()->getWindowWidth(), App::getInstance()->getWindowHeight()}, -100},
 
     m_newGameButt{sf::Text{ResourceManager::getInstance()->defaultFont, L"Új játék", 34}, 
-        sf::FloatRect{{720 - 165,500},{330, 110}}},
+        sf::FloatRect{
+            {App::getInstance()->getWindowWidth() - 400.0f, App::getInstance()->getWindowHeight()/2.f - 60}, 
+            {330, 110}}},
         
     m_loadGameButt{sf::Text{ResourceManager::getInstance()->defaultFont, L"Mentett betöltése", 34}, 
-        sf::FloatRect{{720 - 165,640},{330, 110}}, false}
+        sf::FloatRect{
+            {App::getInstance()->getWindowWidth() - 400.0f, App::getInstance()->getWindowHeight()/2.f + 60}, 
+            {330, 110}}, false}
 {
     m_background.modColor({230, 230, 255, 180});
 
