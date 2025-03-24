@@ -19,6 +19,7 @@ public:
     ~MenuScene();
 
     void onEvent(sf::Event const&) override;
+    void update(float dt) override;
 
 private:
     gui::Image m_logo;

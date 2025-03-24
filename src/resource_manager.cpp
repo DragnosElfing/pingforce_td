@@ -1,5 +1,7 @@
+#include "SFML/Graphics/Rect.hpp"
 #include "resources.hpp"
 #include "utils/logger.hpp"
+#include <filesystem>
 
 using namespace pftd;
 
@@ -25,22 +27,26 @@ bool ResourceManager::loadDefaultFont(std::string const& path)
     return defaultFont.openFromFile(path);
 }
 
-bool ResourceManager::addTextureToRepo(std::string const& source, std::string const& id)
+sf::Texture const& ResourceManager::getTexture(std::string const& source)
 {
-    if(m_textures.find(id) != m_textures.end()) {
-        return false;
-    }
-    
-    m_textures[id] = sf::Texture{sf::Image{source}};
+    auto src = std::filesystem::path{std::filesystem::absolute(source)};
 
-    return true;
+    if(m_textures.find(src) != m_textures.end()) {
+        return m_textures.at(src);
+    } else { // TODO: add error handling
+        m_textures[src] = sf::Texture{sf::Image{src}};
+        return m_textures[src];
+    }
 }
 
-sf::Texture const* ResourceManager::getTextureFromRepo(std::string const& id) const
+sf::SoundBuffer const& ResourceManager::getSound(std::string const& source)
 {
-    if(m_textures.find(id) != m_textures.end()) {
-        return &m_textures.at(id);
-    }
+    auto src = std::filesystem::path{std::filesystem::absolute(source)};
 
-    return nullptr;
+    if(m_sounds.find(src) != m_sounds.end()) {
+        return m_sounds.at(src);
+    } else { // TODO: add error handling
+        m_sounds[src] = sf::SoundBuffer{src};
+        return m_sounds[src];
+    }
 }

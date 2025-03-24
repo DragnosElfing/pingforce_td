@@ -18,6 +18,7 @@ project "pingforce"
     files {
         "src/scenes/**.cpp",
         "src/gui/*.cpp",
+        "src/game/*.cpp",
         "src/*.cpp"
     }
 
@@ -35,6 +36,7 @@ project "pingforce"
 
     filter {"system:linux", "action:gmake"}
         links {
+            "sfml-audio-s",
             "sfml-window-s",
             "sfml-graphics-s",
             "sfml-system-s",
@@ -45,8 +47,12 @@ project "pingforce"
             "Xi",
             "udev",
             "GL",
-            "GLEW",
-            "pthread"
+            "pthread",
+            "FLAC",
+            "vorbis",
+            "vorbisenc",
+            "vorbisfile",
+            "ogg"
         }
 
         filter "configurations:Debug"

@@ -4,6 +4,12 @@
 
 namespace pftd {
     
-class Entity : public Object {};
+class Entity : public Object 
+{
+public:
+
+private:
+
+};
 
 }

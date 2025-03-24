@@ -1,6 +1,8 @@
 #include <filesystem>
 #include <stdexcept>
 
+#include "SFML/Audio.hpp"
+
 #include "app.hpp"
 #include "resources.hpp"
 #include "scenes/menu.hpp"
@@ -67,10 +69,6 @@ App* App::create(unsigned int width, unsigned int height, std::string const& tit
     if(!ResourceManager::getInstance()->loadDefaultFont("res/fonts/Gorditas/Gorditas-Bold.ttf")) {
         throw "Nem lehetett megnyitni a betűtípust!";
     }
-    print(std::filesystem::absolute(std::filesystem::path{"res/images/button_bg.png"}));
-    if(!ResourceManager::getInstance()->addTextureToRepo("./res/images/button_bg.png", "button_bg")) {
-        throw "Hiba történt a `res/images/button_bg.png` kép betöltése közben!";
-    }
 
     I->m_running = true;
 
@@ -88,18 +86,34 @@ void App::run()
 
     auto const clickEvent = [this](sf::Event::MouseButtonPressed const& ev)
     {
-        //auto& m = ev.position;
-
         m_scenes[m_activeSceneID]->onEvent(ev);
     };
 
+    sf::Clock clock;
     while(isRunning()) {
         m_renderer->m_window->handleEvents(closeEvent, clickEvent);
+        m_scenes[m_activeSceneID]->update(clock.restart().asSeconds());
         for(auto& obj : m_scenes[m_activeSceneID]->getObjects()) {
             m_renderer->pushQueue(obj);
         }
         m_renderer->render();
     }
+}
+
+bool App::changeScene(std::string newID)
+{
+    if(m_activeSceneID == newID) return false;
+
+    if(m_scenes.find(newID) == m_scenes.end()) throw SceneError{"Nincs ilyen scene."};
+
+    // A default érték, amikor még nincs egy scene sem
+    if(!m_activeSceneID.empty()) {
+        m_scenes[m_activeSceneID]->setActive(false);
+    }
+    m_activeSceneID = newID;
+    m_scenes[newID]->setActive(true);
+
+    return true;
 }
 
 void App::addScene(std::string id, Scene* scene, bool setActive)
@@ -111,16 +125,8 @@ void App::addScene(std::string id, Scene* scene, bool setActive)
 
     m_scenes[id] = scene;
     if(setActive) {
-        m_activeSceneID = id; 
+        this->changeScene(id); 
     }
 }
 
-bool App::changeScene(std::string newID)
-{
-    if(m_activeSceneID == newID) return false;
-    if(m_scenes.find(newID) == m_scenes.end()) throw SceneError{"Nincs ilyen scene."};
-
-    m_activeSceneID = newID;
-    return true;
-}
 ///

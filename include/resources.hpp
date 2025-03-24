@@ -2,13 +2,14 @@
 
 #include <unordered_map>
 
+#include "SFML/Audio/SoundBuffer.hpp"
 #include "SFML/Graphics/Font.hpp"
 
 #include "objects/gui/image.hpp"
 
 namespace pftd {
 
-class ResourceManager 
+class ResourceManager final
 {
 public:
     sf::Font defaultFont;
@@ -19,9 +20,8 @@ public:
 
     [[maybe_unused]]
     bool loadDefaultFont(std::string const&);
-    [[maybe_unused]]
-    bool addTextureToRepo(std::string const&, std::string const&);
-    sf::Texture const* getTextureFromRepo(std::string const&) const;
+    sf::Texture const& getTexture(std::string const&);
+    sf::SoundBuffer const& getSound(std::string const&);
 
     [[nodiscard]]
     static ResourceManager* getInstance() { return m_instance; }
@@ -32,7 +32,8 @@ public:
 private:
     ResourceManager() = default;
 
-    std::unordered_map<std::string, sf::Texture> m_textures; // TODO: store absolute pathes instead of id's
+    std::unordered_map<std::string, sf::Texture> m_textures;
+    std::unordered_map<std::string, sf::SoundBuffer> m_sounds;
     
     static ResourceManager* m_instance;
 };
