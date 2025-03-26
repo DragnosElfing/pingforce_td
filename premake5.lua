@@ -52,7 +52,7 @@ project "pingforce"
         filter "configurations:Debug"
             symbols "On"
             defines {
-                "_PFTD_DEBUG"
+                "_PFTD_DEBUG", "MEMTRACE"
             }
 
             buildoptions {
@@ -79,6 +79,7 @@ project "pingforce_test"
     targetname "test"
 
     files {
+        "test/memtrace.cpp",
         "test/tests.cpp"
     }
 
@@ -86,6 +87,10 @@ project "pingforce_test"
         "test",
         "include",
         "." -- memtrace.h és gtest_lite.h miatt, amit a JPorta szúr be
+    }
+
+    defines {
+        "MEMTRACE"
     }
 
     filter {"system:linux", "action:gmake"}
