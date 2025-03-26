@@ -43,9 +43,9 @@ void Button::setBackground(std::string const& id)
         this->position, this->size, this->yIndex};
 }
 
-void Button::handleClick(sf::Vector2i const& interactionPos)
+void Button::handleClick(int x, int y)
 {
-    if(m_rect.contains({static_cast<float>(interactionPos.x), static_cast<float>(interactionPos.y)})) {
+    if(m_rect.contains({static_cast<float>(x), static_cast<float>(y)})) {
         m_clickSound.play();
         this->m_callback();
     }

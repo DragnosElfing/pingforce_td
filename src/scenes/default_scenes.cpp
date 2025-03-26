@@ -4,6 +4,7 @@
 #include "SFML/Audio/Sound.hpp"
 #include "SFML/System/Angle.hpp"
 
+#include "objects/gui/image.hpp"
 #include "resources.hpp"
 #include "scene.hpp"
 #include "scenes/menu.hpp"
@@ -63,8 +64,9 @@ void MenuScene::onEvent(sf::Event const& ev)
 {   
     auto clickEvent = ev.getIf<sf::Event::MouseButtonPressed>();
     if(clickEvent) {
-        m_newGameButt.handleClick(clickEvent->position);
-        m_loadGameButt.handleClick(clickEvent->position);
+        auto const& clickPos = clickEvent->position;
+        m_newGameButt.handleClick(clickPos.x, clickPos.y);
+        m_loadGameButt.handleClick(clickPos.x, clickPos.y);
     }
 }
 
@@ -72,6 +74,14 @@ void MenuScene::update(float)
 {
 
 }
+///
+
+/// InventoryItem
+
+///
+
+/// Inventory
+
 ///
 
 /// Game
@@ -131,10 +141,10 @@ void GameScene::onEvent(sf::Event const& ev)
 {
     auto clickEvent = ev.getIf<sf::Event::MouseButtonPressed>();
     if(clickEvent) {
-        m_saveButt.handleClick(clickEvent->position);
+        m_saveButt.handleClick(clickEvent->position.x, clickEvent->position.y);
     }
 
-    // TODO: seperate update method
+    // TODO: move this into update
     if(m_level->isGameOver()) {
         backgroundMusic->stop();
         this->m_gameoverSound.play();
