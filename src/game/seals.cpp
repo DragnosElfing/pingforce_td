@@ -23,9 +23,10 @@ void Seal::lerpPath()
     std::vector<float> totalLength {};
     for(size_t n = 0U; n < points.size() - 1; ++n) {
         atLength += utils::Vec2f::distance(points.at(n), points.at(n+1));
+        print(atLength);
         float lengthSoFar = atLength;
-        for(size_t s = 0U; s < n; ++s) {
-            lengthSoFar += totalLength.at(s);
+        if(n > 0) {
+            lengthSoFar += totalLength.at(n - 1);
         }
         totalLength.push_back(lengthSoFar);
     }
@@ -43,7 +44,7 @@ void Seal::lerpPath()
     auto to = points.at(fromIdx + 1);
 
     this->setPosition(from*(1-t) + to*t);
-    print((lerpProgress - (fromIdx == 0 ? 0 : totalLength.at(fromIdx-1))) << " / " << utils::Vec2f::distance(points.at(fromIdx+1), points.at(fromIdx)));
+    //print((lerpProgress - (fromIdx == 0 ? 0 : totalLength.at(fromIdx-1))) << " / " << utils::Vec2f::distance(points.at(fromIdx+1), points.at(fromIdx)));
 }
 
 void Seal::update(float dt)
