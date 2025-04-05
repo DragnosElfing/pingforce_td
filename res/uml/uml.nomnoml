@@ -1,0 +1,133 @@
+#title pingforce_uml
+
+#.template: dashed title=italic
+#.static: visual=none title=underline
+
+#[<reference> pftd|
+[<table id=app> App |
+	- m_running: bool
+    - m_renderer: Renderer*
+    - m_resManager: ResourceManager*
+    - m_scenes: map<string, Scene*>
+    - m_activeSceneID: string
+    - m_instance: static App*||
+    - App()
+    + ~App()
+	+ run(): void
+    + isRunning(): bool
+    + addScene(string, Scene*, bool): void
+    + changeScene(string): bool
+    + getInstance(): static App*
+    + create(uint, uint, string): static App*
+    + destroy(): static void
+]
+[<table id=renderer> Renderer |
+	- m_window: sf::RenderWindow*
+	- m_queue: priority_queue<Object const*> ||
+    + Renderer(uint, uint, string)
+    + Renderer(Renderer const&)
+    + Renderer(Renderer&&)
+    + ~Renderer()
+    + render(): void
+    + pushQueue(Object const*): void
+    + getWindow(): sf::RenderWindow*
+]
+[<abstract id=layer> Scene |
+	+ id: uint
+    \# resManager: ResourceManager&
+	\# objects: HCollection<Object*> |
+    + Scene(ResourceManager&)
+    + virtual ~Scene()
+    + virtual handleMousePress(sf::Vector2i const&): void
+    + virtual handleMouseRelease(sf::Vector2i const&): void
+    + getObjects(): HCollection<Object*>
+]
+[<table id=menulayer> MenuScene |
+	- m_newGameButt: Button
+    - m_loadGameButt: Button ||
+    
+    + MenuScene()
+    + ~MenuScene()
+]
+[<table id=gamelayer> GameScene |
+	- m_resManager: ResourceManager*
+    - m_entities: Entity**
+]
+[<table id=level> Level]
+[<table id=spawner> Spawner]
+[<table id=followpath> FollowPath]
+[<table id=button> Button]
+[<table id=audiosettings> AudioSettings]
+[<table id=rmanager> ResourceManager |
+	- m_spriteCache: sf::Sprite*||
+    + openImage(string const&): bool
+]
+[<table id=object> Object |
+	\# yIndex: int ||
+    + Object()
+    + virtual ~Object()
+    + virtual draw(sf::RenderTarget&, sf::RenderStates): void
+]
+[<table id=objcomp> Compare |
+	+ operator(Object const&, Object const&): bool
+]
+[<table id=entity> Entity]
+[<table id=penguin> Penguin]
+[<table id=snowballer> Snowballer]
+[<table id=icicle> IcicleFencer]
+[<table id=seal> Seal]
+[<table id=regularseal> RegularSeal]
+[<table id=sealcub> SealCub]
+[<table id=zombieseal> ZombieSeal]
+[<table id=fortzombie> FortifiedZombieCub]
+[<table id=projectile> Projectile]
+[<table id=snowball> Snowball]
+[<abstract id=serial> Serializable |
+	+ read(string const&): void virtual
+    + write(string const&): Serializable virtual
+]
+[<table id=hstore> HCollection
+	[<template> T: class; C: class<T*>]
+
+]
+
+[app]+-[layer]
+[app]+-[renderer]
+[app]+-[rmanager]
+//[layer]+-<<bind>>[hstore]
+[renderer]o-[object]
+[object](o-[objcomp]
+[layer]+-[object]
+[layer]o-[rmanager]
+[menulayer]->[layer]
+[menulayer]+-[button]
+[button]->[object]
+//[gamelayer]<:--[layer]
+[level]-+[gamelayer]
+[spawner]-+[level]
+[followpath]-+[level]
+//[rmanager]-+[gamelayer]
+//[button]-+[gamelayer]
+[entity]-+[gamelayer]
+[penguin]->[entity]
+[snowballer]->[penguin]
+[icicle]->[penguin]
+[seal]->[entity]
+[regularseal]->[seal]
+[sealcub]->[seal]
+[zombieseal]->[regularseal]
+[fortzombie]->[zombieseal]
+[fortzombie]->[sealcub]
+[projectile]->[entity]
+[snowball]->[projectile]
+[serial]--:>[entity]
+[serial]--:>[level]
+
+#]
+
+
+
+
+
+
+
