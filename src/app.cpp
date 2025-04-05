@@ -84,14 +84,25 @@ void App::run()
         m_scenes[m_activeSceneID]->onEvent(ev);
     };
 
-    auto const clickEvent = [this](sf::Event::MouseButtonPressed const& ev)
+    auto const mouseMoveEvent = [this](sf::Event::MouseMoved const& ev)
     {
         m_scenes[m_activeSceneID]->onEvent(ev);
     };
 
+    auto const keyPressEvent = [this](sf::Event::KeyPressed const& ev)
+    {
+        m_scenes[m_activeSceneID]->onEvent(ev);
+    };
+
+    auto const clickEvent = [this](sf::Event::MouseButtonPressed const& ev)
+    {
+        m_scenes[m_activeSceneID]->onEvent(ev);
+    };
+    // Más fajta event-et nem kezelnek a nézetek.
+
     sf::Clock clock;
     while(isRunning()) {
-        m_renderer->m_window->handleEvents(closeEvent, clickEvent);
+        m_renderer->m_window->handleEvents(closeEvent, clickEvent, mouseMoveEvent, keyPressEvent);
         m_scenes[m_activeSceneID]->update(clock.restart().asSeconds());
         for(auto& obj : m_scenes[m_activeSceneID]->getObjects()) {
             m_renderer->pushQueue(obj);

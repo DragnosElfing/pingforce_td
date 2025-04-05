@@ -16,6 +16,7 @@ project "pingforce"
     targetname "pingforce"
 
     files {
+        "src/utils/**.cpp",
         "src/scenes/**.cpp",
         "src/gui/*.cpp",
         "src/game/*.cpp",

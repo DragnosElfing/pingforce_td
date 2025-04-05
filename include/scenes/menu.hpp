@@ -5,9 +5,9 @@
 #include "SFML/Graphics/RenderTarget.hpp"
 
 #include "objects/gui/image.hpp"
-#include "resources.hpp"
-#include "scene.hpp"
 #include "objects/gui/button.hpp"
+#include "scene.hpp"
+#include "resources.hpp"
 
 namespace pftd
 {
@@ -22,10 +22,12 @@ public:
     void update(float dt) override;
 
 private:
-    gui::Image m_logo;
-    gui::Image m_background;
-    gui::Button m_newGameButt;
-    gui::Button m_loadGameButt;
+    //gr::Sprite m_logo;
+    //gr::Sprite m_background;
+    //gr::Label m_acknowledgement;
+    // gr::Button m_newGameButt;
+    // gr::Button m_loadGameButt;
+    std::vector<gr::Button*> m_buttons;
 };
 
 }

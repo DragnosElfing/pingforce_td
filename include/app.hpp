@@ -6,10 +6,9 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "utils/hetero_collection.hpp"
-#include "resources.hpp"
-#include "scene.hpp"
 #include "objects/object_base.hpp"
+#include "scene.hpp"
+#include "resources.hpp"
 
 namespace pftd {
 

@@ -5,9 +5,12 @@ using namespace pftd;
 Scene::~Scene()
 {
     if(backgroundMusic) delete backgroundMusic;
+    for(auto& object : this->getObjects()) {
+        delete object;
+    }
 }
 
-void Scene::setMusic(std::string const& source)
+void Scene::setMusic(std::string const& source, float volume)
 {
     if(backgroundMusic) {
         backgroundMusic->stop();
@@ -20,16 +23,18 @@ void Scene::setMusic(std::string const& source)
     }
 
     backgroundMusic->setLooping(true);
+    backgroundMusic->setVolume(volume);
 }
 
-// TODO: should add and clear m_objects
 bool Scene::setActive(bool active)
 {
     if(active == isActive) return false;
     isActive = active;
 
-    if(active && backgroundMusic) {
-        backgroundMusic->play();
+    if(active) {
+        if(backgroundMusic) {
+            backgroundMusic->play();
+        }
     } else {
         backgroundMusic->stop();
     }

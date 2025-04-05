@@ -4,19 +4,18 @@
 #include "resources.hpp"
 #include "utils/logger.hpp"
 
-using namespace pftd::gui;
+using namespace pftd::gr;
 
 //template<typename CallbackF>
-Button::Button(sf::Text&& label, sf::FloatRect&& rect, bool active, int yIndex):
-    Object{static_cast<sf::Vector2i>(rect.position), static_cast<sf::Vector2i>(rect.size)},
-    isActive{active}, m_label{label}, m_rect{rect},
-    m_clickSound{sf::Sound{ResourceManager::getInstance()->getSound("res/audio/buttonpress.mp3")}}
-{
-    this->yIndex = yIndex;
+Button::Button(sf::Text&& label, utils::Vec2f const& position, utils::Vec2f const& size, bool active, int zIndex):
+    Clickable{position, size, zIndex, active},
     
+    m_label{label}, m_rect{{position.x, position.y}, {size.x, size.y}},
+    m_clickSound{sf::Sound{ResourceManager::getInstance()->getSound("res/audio/buttonpress.mp3")}}
+{   
     // Középre igazítás
-    m_label.setOrigin(m_label.getGlobalBounds().size / 2.0f + m_label.getLocalBounds().position);
-    m_label.setPosition(m_rect.position + m_rect.size / 2.0f);
+    m_label.getText().setOrigin(m_label.getText().getGlobalBounds().size / 2.0f + m_label.getText().getLocalBounds().position);
+    m_label.getText().setPosition(m_rect.position + m_rect.size / 2.0f);
 
     m_clickSound.setVolume(20);
 }
@@ -24,11 +23,6 @@ Button::Button(sf::Text&& label, sf::FloatRect&& rect, bool active, int yIndex):
 Button::~Button()
 {
     if(m_background) delete m_background;
-}
-
-void Button::setCallback(std::function<void()> cb)
-{
-    m_callback = cb;
 }
 
 void Button::setSound(std::string const& source)
@@ -39,8 +33,8 @@ void Button::setSound(std::string const& source)
 void Button::setBackground(std::string const& id)
 {
     if(m_background) delete m_background;
-    m_background = new Image{ResourceManager::getInstance()->getTexture(id), 
-        this->position, this->size, this->yIndex};
+    m_background = new Sprite{ResourceManager::getInstance()->getTexture(id), 
+        this->position, this->size, this->zIndex};
 }
 
 void Button::handleClick(int x, int y)
@@ -67,5 +61,5 @@ void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
         target.draw(rect, states);
     }
     
-    target.draw(m_label, states);
+    m_label.draw(target, states);
 }

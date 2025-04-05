@@ -7,39 +7,32 @@
 
 #include "objects/clickable.hpp"
 #include "objects/gui/image.hpp"
+#include "objects/gui/label.hpp"
 #include "objects/object_base.hpp"
+#include "utils/substitute_types.hpp"
 #include "resources.hpp"
 
 namespace pftd {
-namespace gui {
+namespace gr {
 
-// TODO: should inherit a clickable interface
-class Button : public Object, public Clickable
+class Button : public Clickable
 {
 public:
-    bool isActive;
-
-    //template<typename CallbackF>
-    // TODO: take in position and size instead of a rect
-    Button(sf::Text&&, sf::FloatRect&&, bool active = true, int yIndex = 0);
-
+    Button(sf::Text&& label, utils::Vec2f const& position, utils::Vec2f const& size, bool active = true, int zIndex = 0);
     virtual ~Button();
 
-    // template<typename CallbackF>
-    virtual void setCallback(std::function<void()> callback) override;
-    void setSound(std::string const&);
-    void setBackground(std::string const&);
+    //virtual void setCallback(std::function<void()> callback) override;
+    void setSound(std::string const& src);
+    void setBackground(std::string const& src);
 
-    std::string getLabel() const { return static_cast<std::string>(m_label.getString()); };
-
+    std::string getLabel() const { return static_cast<std::string>(m_label.getText().getString()); };
     virtual void handleClick(int x, int y) override;
-
-    virtual void draw(sf::RenderTarget&, sf::RenderStates) const override;
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:
-    sf::Text m_label;
+    Label m_label;
     sf::FloatRect m_rect;
-    Image* m_background = nullptr;
+    Sprite* m_background = nullptr;
     sf::Sound m_clickSound;
     
 };

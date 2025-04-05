@@ -3,7 +3,7 @@
 #include "scenes/menu.hpp"
 #include "scenes/game.hpp"
 
-#ifdef MEMTRACE
+#ifdef CPORTA
     #include "memtrace.h"
 #endif
 

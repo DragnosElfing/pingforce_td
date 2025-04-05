@@ -1,61 +1,64 @@
 
 #include "SFML/Audio/Sound.hpp"
 
+#include "SFML/Graphics/RenderStates.hpp"
+#include "SFML/Graphics/RenderTarget.hpp"
+#include "objects/entities/seals/seal_base.hpp"
+#include "objects/entities/towers/snowballer.hpp"
+#include "objects/entities/towers/tower_base.hpp"
+#include "objects/serializable.hpp"
+#include "utils/parsers.hpp"
+#include "utils/substitute_types.hpp"
 #include "resources.hpp"
+#include "objects/entities/seals/followpath.hpp"
 
 namespace pftd 
 {
 
-class Level
+class Level : public Object
 {
 public:
-    // TODO: ctor
-    struct Stats
-    {
-        unsigned int round = 0U;
-        unsigned int money = 0U;
-        int const MAX_HP = 3;
-        int hp = MAX_HP;
-    };
-
     struct Nest
     {
-        int posX, posY;
+        utils::Vec2f position;
         int const radius = 110;
-        gui::Image sprite;
+        gr::Sprite* sprite = nullptr;
 
-        explicit Nest(sf::Texture const& texture, int posX, int posY);
+        explicit Nest(sf::Texture const& texture, utils::Vec2f const& position);
         Nest(Nest const& other) = default;
-        ~Nest() = default;
+        ~Nest();
     };
 
-    struct FollowPath : public Object
+    struct Stats : public Serializable
     {
-        struct PathEndPoint
-        {
-            float x, y;
-        };
+        int const MAX_HP = 3;
+        int hp = MAX_HP;
+        unsigned int score = 0U;
+        unsigned int money = 100U;
 
-        float followerVelocity = 1.0f;
-        std::vector<PathEndPoint> path;
-        
-        FollowPath(): Object({}, {}, 1000) {}
-
-        void draw(sf::RenderTarget&, sf::RenderStates) const;
+        explicit Stats();
+        explicit Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth);
     };
 
-    Nest nest;
+    Nest* nest = nullptr;
     Stats stats;
     FollowPath followPath;
+    std::vector<Tower*> towers;
+    std::vector<Seal*> seals;
+    Tower* selectedTower = nullptr;
+    utils::parser::LevelConfigParser config;
     
-    // TODO: take in a Stats object
-    Level(Nest const& nestConfig);
-    virtual ~Level() = default;
+    Level(Stats stats = Stats{});
+    virtual ~Level();
 
     virtual void loseHP(int hpLost = 1);
+    virtual bool placeTower();
+    void deselectTower();
+    void selectTower(Tower* newTower);
+    void spawnSeal();
+    void update(float dt);
     bool isGameOver() const;
-
-private:
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 };
 

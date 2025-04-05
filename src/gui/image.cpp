@@ -1,77 +1,72 @@
 #include "objects/gui/image.hpp"
+#include "resources.hpp"
 
-using namespace pftd::gui;
+using namespace pftd::gr;
 
-// TODO: no
-Image::Image(Image&& other) noexcept:
-    Image{
-        std::move(other.m_texture), 
-        std::move(other.m_sprite.getTextureRect()), 
-        std::move(other.position), 
-        std::move(other.size), 
-        std::exchange(other.yIndex, 0)
-    }
-{ 
-
-}
-
-Image::Image(std::string const& imageSrc, sf::Vector2i const& position, sf::Vector2i const& size, int yIndex):
-    Object{position, size, yIndex},
-    m_texture{sf::Image{imageSrc}}, m_sprite{m_texture}
-{
-    m_sprite.setPosition(static_cast<sf::Vector2f>(this->position));
-    m_sprite.setScale({
-        this->size.x / m_sprite.getLocalBounds().size.x, 
-        this->size.y / m_sprite.getLocalBounds().size.y
-    });
-}
-
-Image::Image(sf::Texture const& texture, sf::Vector2i const& position, sf::Vector2i const& size, int yIndex):
-    Object{position, size, yIndex},
+Sprite::Sprite(sf::Texture const& texture, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+    Object{position, size, zIndex},
     m_texture{texture}, m_sprite{m_texture}
 {
-    m_sprite.setPosition(static_cast<sf::Vector2f>(this->position));
+    m_sprite.setPosition({position.x, position.y});
     m_sprite.setScale({
-        this->size.x / m_sprite.getLocalBounds().size.x, 
-        this->size.y / m_sprite.getLocalBounds().size.y
+        size.x / m_sprite.getLocalBounds().size.x, 
+        size.y / m_sprite.getLocalBounds().size.y
     });
 }
 
-Image::Image(sf::Texture const& texture, sf::IntRect const& spriteRect, sf::Vector2i const& position, sf::Vector2i const& size, int yIndex):
-    Object{position, size, yIndex},
-    m_texture{texture}, m_sprite{m_texture, spriteRect}
+Sprite::Sprite(std::string const& imageSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+    Sprite{ResourceManager::getInstance()->getTexture(imageSrc), position, size, zIndex}
 {
-    m_sprite.setPosition(static_cast<sf::Vector2f>(this->position));
+
+}
+
+Sprite::Sprite(sf::Texture const& texture, sf::IntRect const& textureRect, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+    Object{position, size, zIndex},
+    m_texture{texture}, m_sprite{m_texture, textureRect}
+{
+    m_sprite.setPosition({position.x, position.y});
     m_sprite.setScale({
         this->size.x / m_sprite.getLocalBounds().size.x, 
         this->size.y / m_sprite.getLocalBounds().size.y
     });
 }
 
-Image::Image(Image const& other):
-    Image{
+Sprite::Sprite(Sprite const& other):
+    Sprite{
         other.m_texture,
         other.m_sprite.getTextureRect(),
         other.position,
         other.size,
-        other.yIndex
+        other.zIndex
     }
 { 
     
 }
 
+// TODO: no
+Sprite::Sprite(Sprite&& other) noexcept:
+    Sprite{
+        std::move(other.m_texture), 
+        std::move(other.m_sprite.getTextureRect()), 
+        std::move(other.position), 
+        std::move(other.size), 
+        std::exchange(other.zIndex, 0)
+    }
+{ 
 
-void Image::modColor(sf::Color const& color)
+}
+
+void Sprite::modColor(sf::Color const& color)
 {
     m_sprite.setColor(color);
 }
 
-void Image::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void Sprite::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     target.draw(m_sprite, states);
 }
 
-void Image::setSpriteRect(sf::IntRect const& spriteRect)
+void Sprite::setSpriteRect(sf::IntRect const& textureRect)
 {
-    m_sprite.setTextureRect(spriteRect);
+    m_sprite.setTextureRect(textureRect);
 }
