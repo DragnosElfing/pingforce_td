@@ -1,14 +1,13 @@
 #pragma once
 
-#include <vector>
+#include "all.hpp"
 #include "utils/hetero_collection.hpp"
-#include "utils/substitute_types.hpp"
 
 namespace pftd {
 
 struct FollowPath : public utils::HCollection<utils::Vec2f>
 {
-    float followerSpeed = 15.0f;   
+    //float followerSpeed = 50.0f;   
     FollowPath();
 };
 

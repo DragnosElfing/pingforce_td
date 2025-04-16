@@ -1,13 +1,10 @@
 #pragma once
 
-#include <functional>
-#include <vector>
+#include "all.hpp"
 
-#include "SFML/Audio/Music.hpp"
 #include "SFML/Window/Event.hpp"
 
 #include "objects/object_base.hpp"
-#include "resources.hpp"
 
 namespace pftd {
 

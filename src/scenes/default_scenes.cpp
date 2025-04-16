@@ -1,10 +1,3 @@
-#include <algorithm>
-#include <cmath>
-#include <ctime>
-
-#include "SFML/Audio/Sound.hpp"
-#include "SFML/System/Angle.hpp"
-
 #include "SFML/Window/Keyboard.hpp"
 #include "SFML/Window/Mouse.hpp"
 #include "objects/entities/towers/iciclestabber.hpp"
@@ -112,7 +105,7 @@ GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, std::
 
     this->setCallback([this, level](){
         if(!level) return;
-        level->selectTower(towerToSpawn);
+        level->selectTower(towerToSpawn->clone());
     });
 }
 
@@ -249,11 +242,7 @@ void GameScene::startGame()
 
     if(m_level) delete m_level;
 
-    #ifdef _PFTD_DEBUG
-    Level::Stats defStats {10000, 10000, 0, 10000};
-    #else
-    Level::Stats defStats {3, 3, 0, 100};
-    #endif
+    Level::Stats defStats {3, 3, 0, 250};
     m_level = new Level{defStats};
 
     objects.push_back(m_level);
@@ -272,8 +261,6 @@ void GameScene::startGame()
 
     m_hornSound.play();
     m_hornSound.setVolume(100);
-
-    m_level->spawnSeal();
 }
 
 void GameScene::updateScore()

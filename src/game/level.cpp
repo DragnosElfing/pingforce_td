@@ -1,11 +1,13 @@
-#include "SFML/Graphics/PrimitiveType.hpp"
-#include "SFML/Graphics/Texture.hpp"
-
 #include "game/level.hpp"
-#include "resources.hpp"
-#include "utils/logger.hpp"
-#include "utils/parsers.hpp"
-#include "utils/substitute_types.hpp"
+// TODO: put these inside a single header file
+#include "objects/entities/projectiles/projectile_base.hpp"
+#include "objects/entities/projectiles/snowball.hpp"
+#include "objects/entities/seals/cub.hpp"
+#include "objects/entities/seals/fortified_zombie_cub.hpp"
+#include "objects/entities/seals/regular.hpp"
+#include "objects/entities/seals/zombie.hpp"
+#include "utils/random_gen.hpp"
+#include "app.hpp"
 
 using namespace pftd;
 using Stats = Level::Stats;
@@ -72,12 +74,15 @@ Level::~Level()
     for(auto& seal : seals) {
         delete seal;
     }
+    for(auto& proj : projectiles) {
+        delete proj;
+    }
 }
 
 void Level::loseHP(int hpLost)
 {
     if(hpLost >= stats.hp) {
-        stats.hp = 0U;
+        stats.hp = 0;
     } else {
         stats.hp -= hpLost;
     }
@@ -99,6 +104,9 @@ bool Level::placeTower()
     if(stats.money >= selectedTower->price) {
         stats.money -= selectedTower->price;
         towers.push_back(std::move(selectedTower));
+        towers.back()->setProjSpawnCb([this](Projectile* projectile){
+            projectiles.push_back(std::move(projectile));
+        });
         selectedTower = nullptr;
         
         return true;
@@ -119,29 +127,102 @@ void Level::deselectTower()
 void Level::selectTower(Tower* newTower)
 {
     this->deselectTower();
-    selectedTower = new Tower{*newTower};
+    selectedTower = newTower; // TODO: clone method for entities
 }
 
 void Level::spawnSeal()
 {
-    auto newSeal = new Seal{followPath};
-    newSeal->setPosition(followPath.getContainer().at(5));
+    Seal* newSeal = nullptr;
+
+    std::uniform_real_distribution<float> dist {0.0, 1.0};
+    float const r = utils::Random::generate(dist);
+    if(r <= 0.4f) {
+        newSeal = new RegularSeal{followPath};
+    } else if(r <= 0.6f) {
+        newSeal = new Cub{followPath};
+    } else if(r <= 0.8f) {
+        newSeal = new ZombieSeal{followPath};
+    } else {
+        newSeal = new FZC{followPath};
+    }
+    newSeal->setPosition(followPath.getContainer().front());
     seals.push_back(newSeal);
 }
 
 void Level::update(float dt)
 {
-    for(auto& entity : towers) {
-        entity->update(dt);
+    for(auto tower : towers) {
+        tower->update(dt);
+        tower->lookForTarget(seals);
     }
-    for(auto& entity : seals) {
-        entity->update(dt);
+
+    for(auto& proj : projectiles) {
+        proj->update(dt);
     }
+    
+    // Non-linear hozzáférés az elemekhez
+    for(auto it = seals.begin(); it != seals.end();) {
+        auto& seal = *it;
+        
+        if(seal->hp <= 0 || seal->hasCompletedPath()) {
+            stats.money += seal->value;
+            stats.score += seal->value * 3;
+            delete seal;
+            it = seals.erase(it);
+        } else {
+            if(seal->isStealing) {
+                this->loseHP();
+                seal->isStealing = false;
+            }
+            seal->update(dt);
+            it = std::next(it);
+        }
+    }
+
+    for(auto it = projectiles.begin(); it != projectiles.end();) {
+        auto& proj = *it;
+
+        bool deletion = false;
+        for(auto& seal : seals) {
+            if(utils::Vec2f::distance(proj->getPosition(), seal->getPosition()) < 100) {
+                seal->damage();
+                
+                delete proj;
+                it = projectiles.erase(it);
+                deletion = true;
+                break;
+            }
+        }
+
+        if(!deletion) {
+            auto projPos = sf::Vector2i{static_cast<int>(proj->getPosition().x), static_cast<int>(proj->getPosition().y)};
+            if(!sf::IntRect{{0, 0}, {App::getInstance()->getWindowWidth(), App::getInstance()->getWindowHeight()}}
+                .contains(projPos)) {
+                    delete proj;
+                    it = projectiles.erase(it);
+                    deletion = true;
+            }
+        }
+
+        if(!deletion) {
+            it = std::next(it);
+        }
+    }
+
+    if(accuTime >= 1.0f) {
+        if(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) <= 0.9f) {
+            this->spawnSeal();
+        }
+
+        accuTime = 0.0f;
+    }
+
+    accuTime += dt;
 }
 
 bool Level::isGameOver() const 
 {
-    return stats.hp == 0U;
+    return stats.hp <= 0;
 }
 
 void Level::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -151,6 +232,9 @@ void Level::draw(sf::RenderTarget& target, sf::RenderStates states) const
     }
     for(auto& seal : seals) {
         seal->draw(target, states);
+    }
+    for(auto& proj : projectiles) {
+        proj->draw(target, states);
     }
 
     if(nest) nest->sprite->draw(target, states);

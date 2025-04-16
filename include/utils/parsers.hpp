@@ -1,11 +1,6 @@
 #pragma once
 
-#include "utils/logger.hpp"
-#include <istream>
-#include <fstream>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+#include "all.hpp"
 
 namespace pftd 
 {
@@ -73,12 +68,58 @@ private:
 
 class SaveFileParser final : public Parser<>
 {
+    struct StatsInfo 
+    {
+        unsigned int score, wealth, hp;
+    };
+
+    //? Enzeknek biztos nem itt kéne lennie, de hová kerüljenek?
+    enum class EntityType 
+    {
+        TOWER,
+        SEAL,
+        PROJECTILE
+    };
+    enum class TowerType
+    {
+        SNOWBALLER = 0,
+        ICICLE_STABBER
+    };
+    enum class SealType
+    {
+        REGULAR = 0,
+        CUB,
+        ZOMBIE,
+        FZC
+    };
+
+    struct EntityInfo 
+    {
+        EntityType entityType;
+        union subtype {
+            TowerType towerType;
+            SealType sealType;
+        };
+        utils::Vec2f position;
+        unsigned int sealHP;
+    };
+
 public:
     SaveFileParser(std::string const& sourceFile);
     ~SaveFileParser() = default;
 
     void parse() override;
 
+    StatsInfo getStats() const;
+    std::vector<EntityInfo> getEntities() const;
+
+    //? De! Használhatjuk írásra is! Habár, ekkor már ez nem csak egy parser, hm?
+    //? Esetleg egy új osztály, vagy csak más elnevezés?
+    //? Talán?
+
+private:
+    StatsInfo m_readStats;
+    std::vector<EntityInfo> m_entities;
 };
 
 }

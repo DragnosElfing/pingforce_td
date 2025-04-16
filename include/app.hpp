@@ -1,14 +1,9 @@
 #pragma once
 
-#include <string>
-#include <map>
-#include <queue>
-
-#include "SFML/Graphics.hpp"
+#include "all.hpp"
 
 #include "objects/object_base.hpp"
 #include "scene.hpp"
-#include "resources.hpp"
 
 namespace pftd {
 

@@ -1,13 +1,6 @@
-#include <filesystem>
-#include <stdexcept>
-
-#include "SFML/Audio.hpp"
-
 #include "app.hpp"
-#include "resources.hpp"
 #include "scenes/menu.hpp"
 #include "scenes/game.hpp"
-#include "utils/logger.hpp"
 
 using namespace pftd;
 

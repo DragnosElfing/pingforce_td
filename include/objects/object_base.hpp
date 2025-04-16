@@ -1,8 +1,6 @@
 #pragma once
 
-#include "SFML/Graphics/Drawable.hpp"
-
-#include "utils/substitute_types.hpp"
+#include "all.hpp"
 
 namespace pftd
 {
@@ -18,6 +16,7 @@ public:
     Object(Object&&) noexcept = default;
     virtual ~Object() = default;
 
+    //virtual Object* clone() const = 0;
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const = 0;
 
     struct Compare

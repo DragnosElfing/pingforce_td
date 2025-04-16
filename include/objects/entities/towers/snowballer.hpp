@@ -11,7 +11,9 @@ public:
     Snowballer();
     ~Snowballer() = default;
 
-    void update(float dt);
+    Tower* clone() const override;
+    void update(float dt) override;
+    void attack() override;
     
 };
 

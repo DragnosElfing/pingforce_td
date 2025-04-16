@@ -1,12 +1,5 @@
 #pragma once
 
-#include <utility>
-#include <vector>
-
-#include "SFML/Graphics/RenderStates.hpp"
-#include "SFML/Graphics/RenderTarget.hpp"
-#include "SFML/System/Vector2.hpp"
-
 #include "objects/gui/image.hpp"
 #include "objects/gui/button.hpp"
 #include "utils/hetero_collection.hpp"

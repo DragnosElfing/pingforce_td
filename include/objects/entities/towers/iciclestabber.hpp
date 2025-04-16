@@ -11,6 +11,7 @@ public:
     IcicleStabber();
     ~IcicleStabber() = default;
     
+    Tower* clone() const override;
     void update(float dt) override;
 };
 

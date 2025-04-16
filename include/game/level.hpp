@@ -1,16 +1,11 @@
 
-#include "SFML/Audio/Sound.hpp"
+#include "all.hpp"
 
-#include "SFML/Graphics/RenderStates.hpp"
-#include "SFML/Graphics/RenderTarget.hpp"
+#include "objects/entities/projectiles/projectile_base.hpp"
 #include "objects/entities/seals/seal_base.hpp"
-#include "objects/entities/towers/snowballer.hpp"
 #include "objects/entities/towers/tower_base.hpp"
 #include "objects/serializable.hpp"
 #include "utils/parsers.hpp"
-#include "utils/substitute_types.hpp"
-#include "resources.hpp"
-#include "objects/entities/seals/followpath.hpp"
 
 namespace pftd 
 {
@@ -45,6 +40,7 @@ public:
     FollowPath followPath;
     std::vector<Tower*> towers;
     std::vector<Seal*> seals;
+    std::vector<Projectile*> projectiles;
     Tower* selectedTower = nullptr;
     utils::parser::LevelConfigParser config;
     
@@ -59,6 +55,8 @@ public:
     void update(float dt);
     bool isGameOver() const;
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
+    float accuTime = 0.0f;
 
 };
 

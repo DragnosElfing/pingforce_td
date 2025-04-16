@@ -24,6 +24,11 @@ struct Vec2
         return std::sqrt((v2.x-v1.x)*(v2.x-v1.x) + (v2.y-v1.y)*(v2.y-v1.y));
     }
 
+    Vec2 normalize() const
+    {
+        return *this / Vec2::distance(*this, {0, 0});
+    }
+
     Vec2 operator+(Vec2 const& right) const
     {
         return {this->x + right.x, this->y + right.y};

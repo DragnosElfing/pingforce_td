@@ -1,7 +1,4 @@
-#include "SFML/Graphics/Rect.hpp"
 #include "resources.hpp"
-#include "utils/logger.hpp"
-#include <filesystem>
 
 using namespace pftd;
 

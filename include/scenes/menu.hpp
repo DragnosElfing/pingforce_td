@@ -1,9 +1,5 @@
 #pragma once
 
-#include "SFML/Graphics/Drawable.hpp"
-#include "SFML/Graphics/Rect.hpp"
-#include "SFML/Graphics/RenderTarget.hpp"
-
 #include "objects/gui/image.hpp"
 #include "objects/gui/button.hpp"
 #include "scene.hpp"

@@ -1,16 +1,11 @@
 #pragma once
 
-#include <functional>
-
-#include "SFML/Audio/Sound.hpp"
-#include "SFML/Graphics.hpp"
+#include "all.hpp"
 
 #include "objects/clickable.hpp"
 #include "objects/gui/image.hpp"
 #include "objects/gui/label.hpp"
 #include "objects/object_base.hpp"
-#include "utils/substitute_types.hpp"
-#include "resources.hpp"
 
 namespace pftd {
 namespace gr {
@@ -29,8 +24,10 @@ public:
     virtual void handleClick(int x, int y) override;
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-private:
+protected:
     Label m_label;
+
+private:
     sf::FloatRect m_rect;
     Sprite* m_background = nullptr;
     sf::Sound m_clickSound;

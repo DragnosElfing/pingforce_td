@@ -1,68 +1,70 @@
-#include <cmath>
+#include "all.hpp"
+
+#include "objects/entities/seals/fortified_zombie_cub.hpp"
+#include "objects/entities/seals/regular.hpp"
+#include "objects/entities/seals/cub.hpp"
 #include "objects/entities/seals/seal_base.hpp"
-#include "utils/substitute_types.hpp"
+#include "objects/entities/seals/zombie.hpp"
+
+#ifndef _PFTD_DEBUG
+    #define BANANACHANCE 0.01f
+#else
+    #define BANANACHANCE 0.1f
+#endif
 
 using namespace pftd;
 
-Seal::Seal(FollowPath const& followPath):
-    Entity("res/images/eggs.png", {}, {170, 170}),
-    followPath{followPath}
+/// Regular
+RegularSeal::RegularSeal(FollowPath const& followpath):
+    Seal{followpath, 
+        // TODO: where Random static class?
+    static_cast<float>(rand()) / static_cast<float>(RAND_MAX) <= BANANACHANCE ? "res/images/seals/banana.png" : "res/images/seals/reg.png", 
+        {170, 170}, 2, 40.0f, 50}
 {
 
 }
 
-void Seal::lerpPath()
+Seal* RegularSeal::clone() const
 {
-    // https://www.desmos.com/calculator/bd4zr21hx0
+    return new RegularSeal{followPath};
+}
+///
 
-    auto& points = followPath.getContainer();
-    if(points.size() <= 1) return;
+/// Cub
+Cub::Cub(FollowPath const& followpath):
+    Seal{followpath, "res/images/seals/cub.png", {130, 130}, 1, 65.0f, 50}
+{
 
-    auto lerpProgress = lerpParam;
-    float atLength = 0.0f;
-    std::vector<float> totalLength {};
-    for(size_t n = 0U; n < points.size() - 1; ++n) {
-        atLength += utils::Vec2f::distance(points.at(n), points.at(n+1));
-        print(atLength);
-        float lengthSoFar = atLength;
-        if(n > 0) {
-            lengthSoFar += totalLength.at(n - 1);
-        }
-        totalLength.push_back(lengthSoFar);
-    }
-    lerpProgress *= atLength;
-
-    size_t fromIdx = 0U;
-    while(lerpProgress >= totalLength.at(fromIdx)) {
-        ++fromIdx;
-    }
-    fromIdx = std::min(fromIdx, points.size() - 1);
-
-    auto t = (lerpProgress - (fromIdx == 0 ? 0 : totalLength.at(fromIdx))) 
-        / utils::Vec2f::distance(points.at(fromIdx+1), points.at(fromIdx));
-    auto from = points.at(fromIdx);
-    auto to = points.at(fromIdx + 1);
-
-    this->setPosition(from*(1-t) + to*t);
-    //print((lerpProgress - (fromIdx == 0 ? 0 : totalLength.at(fromIdx-1))) << " / " << utils::Vec2f::distance(points.at(fromIdx+1), points.at(fromIdx)));
 }
 
-void Seal::update(float dt)
+Seal* Cub::clone() const
 {
-    this->lerpPath();
+    return new Cub{followPath};
+}
+///
 
-    lerpParam += 10 * followPath.followerSpeed * dt / 1000.0f;
-    if(lerpParam >= 1.0f) {
-        lerpParam = 0.0f;
-    }
+/// Zombie
+ZombieSeal::ZombieSeal(FollowPath const& followpath):
+    Seal{followpath, "res/images/seals/zom.png", {170, 170}, 5, 10.0f, 100}
+{
 
-    Entity::update(dt);
 }
 
-void Seal::advanceAnimationFrame()
+Seal* ZombieSeal::clone() const
 {
-    this->getSprite()->get().m_sprite.setScale({
-        this->size.x / this->getSprite()->get().m_sprite.getLocalBounds().size.x, 
-        this->size.y / this->getSprite()->get().m_sprite.getLocalBounds().size.y * (std::sin(totalElapsedSec)/8.0f + 1)
-    });
+    return new ZombieSeal{followPath};
 }
+///
+
+/// FZC
+FZC::FZC(FollowPath const& followpath):
+    Seal{followpath, "res/images/seals/fzc.png", {130, 130}, 10, 15.0f, 200}
+{
+
+}
+
+Seal* FZC::clone() const
+{
+    return new FZC{followPath};
+}
+///

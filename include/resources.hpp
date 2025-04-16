@@ -1,9 +1,7 @@
 #pragma once
 
-#include <unordered_map>
-
-#include "SFML/Audio/SoundBuffer.hpp"
-#include "SFML/Graphics/Font.hpp"
+#include "SFML/Graphics.hpp"
+#include "SFML/Audio.hpp"
 
 #include "objects/gui/image.hpp"
 

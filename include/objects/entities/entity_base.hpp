@@ -1,14 +1,10 @@
 #pragma once
 
-#include <functional>
-#include <optional>
+#include "all.hpp"
 
-#include "SFML/Graphics/RenderStates.hpp"
-#include "SFML/Graphics/RenderTarget.hpp"
 #include "objects/gui/image.hpp"
 #include "objects/object_base.hpp"
 #include "objects/serializable.hpp"
-#include "utils/substitute_types.hpp"
 
 namespace pftd {
     
@@ -25,6 +21,7 @@ public:
     Entity(Entity const& other);
     virtual ~Entity();
 
+    virtual Entity* clone() const = 0;
     virtual void update(float dt);
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     void setPosition(utils::Vec2f position);

@@ -1,3 +1,4 @@
+#include "objects/entities/projectiles/snowball.hpp"
 #include "objects/entities/towers/snowballer.hpp"
 #include "objects/entities/towers/iciclestabber.hpp"
 #include "utils/logger.hpp"
@@ -6,10 +7,10 @@ using namespace pftd;
 
 /// Snowballer
 Snowballer::Snowballer(utils::Vec2f const& position, int zIndex):
-    Tower{"res/images/penguins/snowballer_peng.png", position, {170, 170}, zIndex}
+    Tower{"res/images/penguins/snowballer_peng.png", 1.1f, position, {170, 170}, zIndex}
 {
     price = 100U;
-    attackSpeedSec = 1.5f;
+    attackRangePixel = 400.0f;
 }
 
 Snowballer::Snowballer():
@@ -18,18 +19,32 @@ Snowballer::Snowballer():
 
 }
 
+Tower* Snowballer::clone() const
+{
+    return new Snowballer{position, zIndex};
+}
+
 void Snowballer::update(float dt)
 {
-    Entity::update(dt);
+    Tower::update(dt);
+}
+
+void Snowballer::attack()
+{
+    if(target) {
+        this->spawnProjectile(new Snowball{position, (target->getPosition() - position).normalize(), 300.0f});
+    }
+    Tower::attack();
 }
 ///
 
 /// Icicle Stabber
 IcicleStabber::IcicleStabber(utils::Vec2f const& position, int zIndex):
-    Tower{"res/images/penguins/iciclestabber_peng.png", position, {170, 170}, zIndex}
+    Tower{"res/images/penguins/iciclestabber_peng.png", 0.85f, position, {170, 170}, zIndex}
 {
     price = 150U;
-    attackSpeedSec = 1.0f;
+    attackRangePixel = 150.0f;
+    instantAttack = true;
 }
 
 IcicleStabber::IcicleStabber():
@@ -38,9 +53,14 @@ IcicleStabber::IcicleStabber():
 
 }
 
+Tower* IcicleStabber::clone() const
+{
+    return new IcicleStabber{position, zIndex};
+}
+
 void IcicleStabber::update(float dt)
 {
-    Entity::update(dt);
+    Tower::update(dt);
 }
 
 ///

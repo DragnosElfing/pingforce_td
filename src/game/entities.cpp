@@ -1,9 +1,7 @@
-#include "SFML/Graphics/CircleShape.hpp"
 #include "objects/entities/entity_base.hpp"
+#include "objects/entities/projectiles/projectile_base.hpp"
 #include "objects/entities/towers/tower_base.hpp"
 #include "objects/entities/seals/seal_base.hpp"
-#include "resources.hpp"
-#include "utils/logger.hpp"
 
 using namespace pftd;
 
@@ -57,6 +55,10 @@ void Entity::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     if(currentSprite) {
         currentSprite->draw(target, states);
+        sf::CircleShape circle {10.0f};
+        circle.setFillColor(sf::Color::Red);
+        circle.setPosition({position.x, position.y});
+        target.draw(circle, states);
     }
 }
 
@@ -85,38 +87,182 @@ void Entity::advanceAnimationFrame()
 ///
 
 /// Tower
-Tower::Tower(std::string const& spriteSheetSrc, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
-    Entity{spriteSheetSrc, spriteSize, position, size, zIndex}
+Tower::Tower(std::string const& spriteSheetSrc, utils::Vec2i spriteSize, float attackSpeedSec, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+    Entity{spriteSheetSrc, spriteSize, position, size, zIndex},
+
+    attackSpeedSec{attackSpeedSec},
+    spawnProjectile{[](Projectile*){}}
 {
     frameDurationSec = attackSpeedSec / CELL_N;
 }
 
-Tower::Tower(std::string const& spriteSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
-    Tower{spriteSrc, {1024, 1024}, position, size, zIndex}
+Tower::Tower(std::string const& spriteSrc, float attackSpeedSec, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+    Tower{spriteSrc, {1024, 1024}, attackSpeedSec, position, size, zIndex}
 {
 
 }
 
 Tower::Tower(Tower const& other):
     Entity{other},
-    attackSpeedSec{other.attackSpeedSec}
+    radiusPixel{other.radiusPixel},
+    attackRangePixel{other.attackRangePixel},
+    attackSpeedSec{other.attackSpeedSec},
+    price{other.price}
 {
     frameDurationSec = attackSpeedSec / CELL_N;
 }
 
-void Tower::attack(bool instant)
+void Tower::setProjSpawnCb(ProjSpawnFunc callback)
 {
-    if(instant) return;
-    // ...
+    spawnProjectile = callback;
 }
 
-Entity const* Tower::lookForTarget() const
+void Tower::attack()
 {
-    // ...
-    return nullptr;
+    if(target) {
+        if(instantAttack) target->damage();
+        // else spawnProjectile(...)
+    }
+}
+
+bool Tower::lookForTarget(std::vector<Seal*> const& enemies)
+{
+    // Ha már van target, nem keresünk újat.
+    //if(target) return true;
+
+    for(auto const& enemy : enemies) {
+        if(utils::Vec2f::distance(enemy->getPosition(), this->getPosition()) < attackRangePixel) {
+            target = enemy;
+            return true;
+        }
+    }
+
+    target = nullptr;
+    attackTimerSec = 0.0f;
+    return false;
+}
+
+void Tower::update(float dt)
+{
+    Entity::update(dt);
+
+    if(target) {
+        if(attackTimerSec >= attackSpeedSec) {
+            attackTimerSec = 0.0f;
+            this->attack();
+        }
+
+        attackTimerSec += dt;
+    }
+}
+
+void Tower::advanceAnimationFrame()
+{
+    if(target) {
+        Entity::advanceAnimationFrame();
+    }
 }
 ///
 
 /// Seal
+Seal::Seal(FollowPath const& followPath, std::string const& spriteSrc, utils::Vec2f const& size, int hp, float speed, unsigned int value, int zIndex):
+    Entity(spriteSrc, {}, size, zIndex),
+    
+    hp{hp},
+    speed{speed},
+    value{value},
+    followPath{followPath}
+{
+
+}
+
+void Seal::lerpPath()
+{
+    // https://www.desmos.com/calculator/bd4zr21hx0
+
+    auto& points = followPath.getContainer();
+    if(points.size() <= 1) return;
+
+    auto lerpProgress = lerpParam;
+    float atLength = 0.0f;
+    std::vector<float> totalLength {};
+    for(size_t n = 0U; n < points.size() - 1; ++n) {
+        atLength += utils::Vec2f::distance(points.at(n), points.at(n+1));
+        totalLength.push_back(atLength);
+    }
+    lerpProgress *= atLength;
+
+    size_t fromIdx = 0U;
+    while(lerpProgress > totalLength.at(fromIdx)) {
+        ++fromIdx;
+    }
+    fromIdx = std::min(fromIdx, points.size() - 1);
+
+    auto from = points.at(fromIdx);
+    auto to = points.at(fromIdx + 1);
+    auto t = (lerpProgress - (fromIdx != 0 ? totalLength.at(fromIdx - 1) : 0)) 
+        / utils::Vec2f::distance(from, to);
+
+    this->setPosition(from*(1-t) + to*t);
+}
+
+void Seal::damage(int hpLost)
+{
+    if(hp - hpLost < 0) {
+        hp = 0;
+    } else {
+        hp -= hpLost;
+    }
+
+    uint8_t newGB = std::max(255 - hp*10, 0); // TODO: make this work
+    this->getSprite()->get().modColor({255, newGB, newGB, 255});
+}
+
+void Seal::update(float dt)
+{
+    this->lerpPath();
+
+    lerpParam += (reachedNest ? -1 : 1) * speed * dt / 1000.0f;
+    if(lerpParam >= 1.0f) {
+        lerpParam = 1.0f;
+        reachedNest = true;
+        isStealing = true;
+    }
+
+    if(lerpParam <= 0.0f && reachedNest) {
+        returned = true;
+    }
+
+    Entity::update(dt);
+}
+
+void Seal::advanceAnimationFrame()
+{
+    // TODO: no
+    this->getSprite()->get().m_sprite.setScale({
+        this->size.x / this->getSprite()->get().m_sprite.getLocalBounds().size.x, 
+        this->size.y / this->getSprite()->get().m_sprite.getLocalBounds().size.y * (std::sin(2*totalElapsedSec)/8.0f + 1)
+    });
+}
+///
+
+/// Projectile
+
+Projectile::Projectile(std::string const& spriteSrc, utils::Vec2f const& position, 
+    utils::Vec2f const& size, utils::Vec2f const& direction, float speed, float angularSpeed, int zIndex):
+    Entity{spriteSrc, position, size, zIndex},
+
+    direction{direction},
+    linearSpeed{speed},
+    angularSpeedRadPerSec{angularSpeed}
+{
+
+}
+
+void Projectile::update(float dt)
+{
+    this->setPosition(this->getPosition() + direction * linearSpeed * dt);
+    //this->getSprite()->get().m_sprite.rotate(sf::radians(angularSpeedRadPerSec) * dt);
+}
 
 ///

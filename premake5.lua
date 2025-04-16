@@ -36,6 +36,8 @@ project "pingforce"
     }
 
     filter {"system:linux", "action:gmake"}
+        pchheader "all.hpp"
+
         links {
             "sfml-audio-s",
             "sfml-window-s",
