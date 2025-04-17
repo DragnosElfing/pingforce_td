@@ -4,12 +4,24 @@
 
 namespace pftd {
 
+/*! "Normális" fóka. */
 class RegularSeal : public Seal
 {
 public:
+    /**
+    * @brief
+    *
+    * @param followpath Az útvonal amin végig kell menjen (majd pedig vissza).
+    */
     RegularSeal(FollowPath const& followpath);
 
+    /**
+    * @brief Egy dinamikus memóriában foglalt másolatot készít a fókából.
+    *
+    * @return A másolat.
+    */
     Seal* clone() const override;
+    
 };
 
 }

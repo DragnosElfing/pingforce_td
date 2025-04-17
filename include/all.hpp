@@ -19,8 +19,10 @@
 #include <fstream>
 
 // SFML
+#if not defined(_PFTD_TEST) && not defined(CPORTA)
 #include "SFML/Graphics.hpp"
 #include "SFML/Audio.hpp"
+#endif
 
 // Own
 #include "utils/logger.hpp"

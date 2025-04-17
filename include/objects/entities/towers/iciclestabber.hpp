@@ -4,6 +4,7 @@
 
 namespace pftd {
 
+/*! Jégcsap kardos. */
 class IcicleStabber final : public Tower
 {
 public:
@@ -11,7 +12,18 @@ public:
     IcicleStabber();
     ~IcicleStabber() = default;
     
+    /**
+    * @brief Egy dinamikus memóriában foglalt másolatot készít a toronyról.
+    *
+    * @return A másolat.
+    */
     Tower* clone() const override;
+
+    /**
+    * @brief Update.
+    *
+    * @param dt Delta idő.
+    */
     void update(float dt) override;
 };
 

@@ -36,7 +36,7 @@ void Renderer::render()
 App::~App()
 {
     m_running = false;
-    // Muszáj kondícionálisan, mert lehet (valójában biztos hogy nem, de meh) hogy sose volt meghívva az App::create
+    // Muszáj kondícionálisan, mert lehet (valójában biztos hogy nem, de meh) hogy sose volt meghívva az `App::create`.
     if(m_renderer) delete m_renderer;
     ResourceManager::destroy();
     for(auto& [_, scene] : m_scenes) {
@@ -95,7 +95,7 @@ void App::run()
 
     sf::Clock clock;
     while(isRunning()) {
-        m_renderer->m_window->handleEvents(closeEvent, clickEvent, mouseMoveEvent, keyPressEvent);
+        m_renderer->getWindow()->handleEvents(closeEvent, clickEvent, mouseMoveEvent, keyPressEvent);
         m_scenes[m_activeSceneID]->update(clock.restart().asSeconds());
         for(auto& obj : m_scenes[m_activeSceneID]->getObjects()) {
             m_renderer->pushQueue(obj);
@@ -112,10 +112,10 @@ bool App::changeScene(std::string newID)
 
     // A default érték, amikor még nincs egy scene sem
     if(!m_activeSceneID.empty()) {
-        m_scenes[m_activeSceneID]->setActive(false);
+        m_scenes[m_activeSceneID]->toggleActive(false);
     }
     m_activeSceneID = newID;
-    m_scenes[newID]->setActive(true);
+    m_scenes[newID]->toggleActive(true);
 
     return true;
 }

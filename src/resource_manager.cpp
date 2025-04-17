@@ -21,7 +21,7 @@ ResourceManager* ResourceManager::create()
 
 bool ResourceManager::loadDefaultFont(std::string const& path)
 {
-    return defaultFont.openFromFile(path);
+    return m_defaultFont.openFromFile(path);
 }
 
 sf::Texture const& ResourceManager::getTexture(std::string const& source)

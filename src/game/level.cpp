@@ -61,7 +61,7 @@ Level::Level(Stats stats):
         {config.getAttribute("nestPosition")[0].first, config.getAttribute("nestPosition")[0].second}};
 
     for(auto& [x, y] : config.getAttribute("followPath")) {
-        followPath.append({x, y});
+        followPath.append(new utils::Vec2{x, y});
     }
 }
 
@@ -145,7 +145,7 @@ void Level::spawnSeal()
     } else {
         newSeal = new FZC{followPath};
     }
-    newSeal->setPosition(followPath.getContainer().front());
+    newSeal->setPosition(*followPath.getContainer().front());
     seals.push_back(newSeal);
 }
 
@@ -170,9 +170,9 @@ void Level::update(float dt)
             delete seal;
             it = seals.erase(it);
         } else {
-            if(seal->isStealing) {
+            if(seal->isCurrentlyStealing) {
                 this->loseHP();
-                seal->isStealing = false;
+                seal->isCurrentlyStealing = false;
             }
             seal->update(dt);
             it = std::next(it);
@@ -209,15 +209,15 @@ void Level::update(float dt)
         }
     }
 
-    if(accuTime >= 1.0f) {
+    if(m_accuTimeSpawnSec >= 1.0f) {
         if(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) <= 0.9f) {
             this->spawnSeal();
         }
 
-        accuTime = 0.0f;
+        m_accuTimeSpawnSec = 0.0f;
     }
 
-    accuTime += dt;
+    m_accuTimeSpawnSec += dt;
 }
 
 bool Level::isGameOver() const 

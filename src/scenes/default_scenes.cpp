@@ -31,13 +31,13 @@ MenuScene::MenuScene()
 
     // Le a kalappal!
     objects.push_back(new gr::Label{
-        sf::Text{ResourceManager::getInstance()->defaultFont, L"A felhasznált illusztrációkat Illés Dóra készítette.", 16}, 
+        sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"A felhasznált illusztrációkat Illés Dóra készítette.", 16}, 
         {10, WIN_HEIGHT - 20}
     });
 
     /* Gombok */
     // Új játék
-    auto newGameButt = new gr::Button{sf::Text{ResourceManager::getInstance()->defaultFont, L"Új játék", 34},
+    auto newGameButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Új játék", 34},
         {WIN_WIDTH - 400.0f, WIN_HEIGHT/2.f - 60}, 
             {330, 110}};
     newGameButt->setBackground("./res/images/button_bg.png");
@@ -47,7 +47,7 @@ MenuScene::MenuScene()
     m_buttons.push_back(newGameButt);
 
     // Mentett betöltése
-    auto loadGameButt = new gr::Button{sf::Text{ResourceManager::getInstance()->defaultFont, L"Mentett betöltése", 34}, 
+    auto loadGameButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Mentett betöltése", 34}, 
         {WIN_WIDTH - 400.0f, WIN_HEIGHT/2.f + 60}, 
             {330, 110}, false};
     loadGameButt->setBackground("./res/images/button_bg.png");
@@ -73,9 +73,9 @@ void MenuScene::onEvent(sf::Event const& ev)
 {   
     auto clickEvent = ev.getIf<sf::Event::MouseButtonPressed>();
     if(clickEvent) {
-        auto const& clickPos = clickEvent->position;
+        auto const clickPos = utils::Vec2i{clickEvent->position.x, clickEvent->position.y};
         for(auto const& button : m_buttons) {
-            button->handleClick(clickPos.x, clickPos.y);
+            button->handleClick(clickPos);
         }
     }
 }
@@ -94,7 +94,7 @@ GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, std::
     frame{"res/images/inventory_frame.png", position, size},
     icon{ResourceManager::getInstance()->getTexture(iconSrc), textureRect, position, size, 100},
     towerToSpawn{std::move(tower)},
-    priceLabel{{ResourceManager::getInstance()->defaultFont, "$" + std::to_string(towerToSpawn->price), 21}, 
+    priceLabel{{ResourceManager::getInstance()->getDefaultFont(), "$" + std::to_string(towerToSpawn->price), 21}, 
         {}, 100, sf::Color::Green}
 {
     // Közép-lentre igazítás
@@ -107,6 +107,11 @@ GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, std::
         if(!level) return;
         level->selectTower(towerToSpawn->clone());
     });
+}
+
+GameScene::InventoryItem::~InventoryItem()
+{
+    delete towerToSpawn;
 }
 
 void GameScene::InventoryItem::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -148,7 +153,7 @@ GameScene::GameScene()
     objects.push_back(new gr::Sprite{"res/images/map.png", {0, 0}, {WIN_WIDTH - 180, WIN_HEIGHT}, -100});
     
     // Mentés & kilépés gomb
-    m_saveButt = new gr::Button{sf::Text{ResourceManager::getInstance()->defaultFont, L"Mentés & Kilépés", 18}, 
+    m_saveButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Mentés & Kilépés", 18}, 
         {10,10},{180, 60}, true, 100};
     m_saveButt->setBackground("./res/images/button_bg.png");
     m_saveButt->setCallback([&self = m_saveButt, this](){ 
@@ -158,10 +163,10 @@ GameScene::GameScene()
 
     // Pénz & pont mutatók
     m_moneyCounter = new gr::Label{
-        sf::Text{ResourceManager::getInstance()->defaultFont, L"$0", 24}, 
+        sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"$0", 24}, 
         {200, 40}, 100, sf::Color::Green};
     m_scoreCounter = new gr::Label{
-        sf::Text{ResourceManager::getInstance()->defaultFont, L"Pont: 0", 24}, 
+        sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Pont: 0", 24}, 
         {200, 10}, 100, sf::Color::Cyan};
     objects.push_back(m_moneyCounter);
     objects.push_back(m_scoreCounter);
@@ -185,9 +190,10 @@ void GameScene::onEvent(sf::Event const& ev)
 {
     auto clickEvent = ev.getIf<sf::Event::MouseButtonPressed>();
     if(clickEvent) {
-        m_saveButt->handleClick(clickEvent->position.x, clickEvent->position.y);
+        auto const clickPos = utils::Vec2i{clickEvent->position.x, clickEvent->position.y};
+        m_saveButt->handleClick(clickPos);
         for(auto& item : m_inventory->getContainer()) {
-            item->handleClick(clickEvent->position.x, clickEvent->position.y);
+            item->handleClick(clickPos);
         }
 
         bool inBounds = clickEvent->position.x < App::getInstance()->getWindowWidth() - 200;
@@ -223,7 +229,7 @@ void GameScene::update(float dt)
     m_level->update(dt);
 }
 
-bool GameScene::setActive(bool active) 
+bool GameScene::toggleActive(bool active) 
 {
     if(active) {
         this->startGame();
@@ -231,7 +237,7 @@ bool GameScene::setActive(bool active)
         m_hornSound.stop();
     }
 
-    return Scene::setActive(active);
+    return Scene::toggleActive(active);
 }
 
 void GameScene::startGame()

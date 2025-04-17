@@ -103,7 +103,8 @@ project "pingforce_test"
     }
 
     defines {
-        "MEMTRACE"
+        "MEMTRACE",
+        "_PFTD_TEST"
     }
 
     filter {"system:linux", "action:gmake"}

@@ -1,5 +1,7 @@
 #pragma once
 
+// Zseniálisan egyszerű logger makrókkal.
+
 #ifdef _PFTD_DEBUG
 
 #include <iostream>

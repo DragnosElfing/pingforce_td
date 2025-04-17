@@ -26,7 +26,7 @@ void Scene::setMusic(std::string const& source, float volume)
     backgroundMusic->setVolume(volume);
 }
 
-bool Scene::setActive(bool active)
+bool Scene::toggleActive(bool active)
 {
     if(active == isActive) return false;
     isActive = active;

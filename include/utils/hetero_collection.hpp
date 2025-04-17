@@ -1,51 +1,62 @@
 #pragma once
 
-#include "utils/logger.hpp"
-#include <stdexcept>
-#include <type_traits>
-#include <vector>
+#include "all.hpp"
 
 namespace pftd {
 namespace utils {
-    
-// TODO: turn this into "container"
-template<typename T, typename C = std::vector<T>>
-class HCollection
+
+/*! Olyan osztályok, amelyek tárolóként (is) használhatók. */
+template<typename T, typename C = std::vector<T*>>
+class Container
 {
 public:
-    class iterator {};
-    class const_iterator {};
-
-    HCollection() = default;
-    virtual ~HCollection()
+    Container() = default;
+    virtual ~Container()
     {
-        if(std::is_pointer<typename C::value_type>::value) {
-            // for(auto& obj : m_container) {
-            //     delete obj;
-            // }
+        for(auto& elem : m_container) {
+            delete elem;
         }
     }
 
-    [[maybe_unused]]
-    virtual T const append(T elem)
-    {   
+    /**
+    * @brief Új elem hozzáadása.
+    *
+    * @param elem A hozzáadni kívánt dolog.
+    * @return Az imént hozzáadott dolog.
+    */
+    virtual T* const append(T* elem)
+    { 
         try {
             m_container.push_back(elem);
         } catch(std::runtime_error err) {
-            throw std::runtime_error{err.what()}; // bruh.
+            throw std::runtime_error{err.what()}; // TODO: ezt ne így, nincs sok értelme
         }
 
         return elem;
     }
 
-    template<typename Pred>
-    void remove(Pred);
+    // ? Nem biztos, hogy kelleni fog bármikor is.
+    // template<typename Pred>
+    // void remove(Pred);
 
+    /**
+    * @brief A tároló mérete.
+    *
+    * @return A tároló elemeinek száma.
+    */
     std::size_t size() const { return m_container.size(); }
+
+    /**
+    * @brief Konstans `m_container` getter.
+    *
+    * @return A tároló.
+    */
     C const& getContainer() const { return m_container; }
 
 private:
+    /*! A tároló. */
     C m_container;
+
 };
 
 }

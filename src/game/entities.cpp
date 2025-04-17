@@ -67,7 +67,7 @@ void Entity::setPosition(utils::Vec2f position)
     this->position = position;
     if(this->getSprite()) {
         auto const newPos = position - size / 2;
-        this->getSprite()->get().m_sprite.setPosition(sf::Vector2f{newPos.x, newPos.y});
+        this->getSprite()->m_sprite.setPosition(sf::Vector2f{newPos.x, newPos.y});
     }
 }
 
@@ -187,7 +187,7 @@ void Seal::lerpPath()
     float atLength = 0.0f;
     std::vector<float> totalLength {};
     for(size_t n = 0U; n < points.size() - 1; ++n) {
-        atLength += utils::Vec2f::distance(points.at(n), points.at(n+1));
+        atLength += utils::Vec2f::distance(*points.at(n), *points.at(n+1));
         totalLength.push_back(atLength);
     }
     lerpProgress *= atLength;
@@ -198,12 +198,14 @@ void Seal::lerpPath()
     }
     fromIdx = std::min(fromIdx, points.size() - 1);
 
-    auto from = points.at(fromIdx);
-    auto to = points.at(fromIdx + 1);
+    auto from = *points.at(fromIdx);
+    auto to = *points.at(fromIdx + 1);
     auto t = (lerpProgress - (fromIdx != 0 ? totalLength.at(fromIdx - 1) : 0)) 
         / utils::Vec2f::distance(from, to);
 
     this->setPosition(from*(1-t) + to*t);
+
+    nextPoint = to;
 }
 
 void Seal::damage(int hpLost)
@@ -214,8 +216,10 @@ void Seal::damage(int hpLost)
         hp -= hpLost;
     }
 
-    uint8_t newGB = std::max(255 - hp*10, 0); // TODO: make this work
-    this->getSprite()->get().modColor({255, newGB, newGB, 255});
+    if(hp > 0) {
+        uint8_t newGB = std::max(255 - 155 / hp, 0); // TODO: make this work
+        this->getSprite()->modColor({255, newGB, newGB, 255});
+    }
 }
 
 void Seal::update(float dt)
@@ -226,11 +230,15 @@ void Seal::update(float dt)
     if(lerpParam >= 1.0f) {
         lerpParam = 1.0f;
         reachedNest = true;
-        isStealing = true;
+        isCurrentlyStealing = true;
     }
 
     if(lerpParam <= 0.0f && reachedNest) {
         returned = true;
+    }
+
+    if((position - nextPoint).x < 0) {
+        // TODO: flip sprite
     }
 
     Entity::update(dt);
@@ -238,10 +246,10 @@ void Seal::update(float dt)
 
 void Seal::advanceAnimationFrame()
 {
-    // TODO: no
-    this->getSprite()->get().m_sprite.setScale({
-        this->size.x / this->getSprite()->get().m_sprite.getLocalBounds().size.x, 
-        this->size.y / this->getSprite()->get().m_sprite.getLocalBounds().size.y * (std::sin(2*totalElapsedSec)/8.0f + 1)
+    // TODO: no, keep a record of the original size instead
+    this->getSprite()->m_sprite.setScale({
+        this->size.x / this->getSprite()->m_sprite.getLocalBounds().size.x, 
+        this->size.y / this->getSprite()->m_sprite.getLocalBounds().size.y * (std::sin(2*totalElapsedSec)/8.0f + 1)
     });
 }
 ///
@@ -254,7 +262,7 @@ Projectile::Projectile(std::string const& spriteSrc, utils::Vec2f const& positio
 
     direction{direction},
     linearSpeed{speed},
-    angularSpeedRadPerSec{angularSpeed}
+    angularVelocityRadPerSec{angularSpeed}
 {
 
 }

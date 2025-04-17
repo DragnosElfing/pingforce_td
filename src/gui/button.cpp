@@ -10,12 +10,12 @@ using namespace pftd::gr;
 Button::Button(sf::Text&& label, utils::Vec2f const& position, utils::Vec2f const& size, bool active, int zIndex):
     Clickable{position, size, zIndex, active},
     
-    m_label{label}, m_rect{{position.x, position.y}, {size.x, size.y}},
+    label{label}, m_rect{{position.x, position.y}, {size.x, size.y}},
     m_clickSound{sf::Sound{ResourceManager::getInstance()->getSound("res/audio/buttonpress.mp3")}}
 {   
     // Középre igazítás
-    m_label.getText().setOrigin(m_label.getText().getGlobalBounds().size / 2.0f + m_label.getText().getLocalBounds().position);
-    m_label.getText().setPosition(m_rect.position + m_rect.size / 2.0f);
+    this->label.getText().setOrigin(this->label.getText().getGlobalBounds().size / 2.0f + this->label.getText().getLocalBounds().position);
+    this->label.getText().setPosition(m_rect.position + m_rect.size / 2.0f);
 
     m_clickSound.setVolume(20);
 }
@@ -37,9 +37,9 @@ void Button::setBackground(std::string const& id)
         this->position, this->size, this->zIndex};
 }
 
-void Button::handleClick(int x, int y)
+void Button::handleClick(utils::Vec2i const& clickCoords)
 {
-    if(m_rect.contains({static_cast<float>(x), static_cast<float>(y)})) {
+    if(m_rect.contains({static_cast<float>(clickCoords.x), static_cast<float>(clickCoords.y)})) {
         m_clickSound.play();
         this->m_callback();
     }
@@ -61,5 +61,5 @@ void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
         target.draw(rect, states);
     }
     
-    m_label.draw(target, states);
+    label.draw(target, states);
 }

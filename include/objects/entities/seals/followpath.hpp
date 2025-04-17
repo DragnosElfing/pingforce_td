@@ -5,9 +5,11 @@
 
 namespace pftd {
 
-struct FollowPath : public utils::HCollection<utils::Vec2f>
+using EndPoint = utils::Vec2f;
+
+/*! Az ellenfelek által követett út. */
+struct FollowPath : public utils::Container<EndPoint>
 {
-    //float followerSpeed = 50.0f;   
     FollowPath();
 };
 

@@ -6,10 +6,15 @@
 namespace pftd {
 namespace utils {
 
+/*! sf::Vector2 helyett használt matematikai vektor implementáció. */
 template<typename T>
 struct Vec2
 {
-    T x, y;
+    /*! X koordináta. */
+    T x;
+
+    /*! Y koordináta. */
+    T y;
 
     Vec2() {}
     Vec2(T x, T y): 
@@ -19,11 +24,25 @@ struct Vec2
         x{right.x}, y{right.y}
     {}
 
+    /**
+    * @brief Két vektor végpontja közti euklideszi távolság.
+    *
+    * @param v1 Egyik vektor.
+    * @param v2 Másik vektor.
+    * @return A távolság.
+    */
     static T distance(Vec2 const& v1, Vec2 const& v2)
     {
         return std::sqrt((v2.x-v1.x)*(v2.x-v1.x) + (v2.y-v1.y)*(v2.y-v1.y));
     }
 
+    /**
+    * @brief Vektor normalizálása.
+    *
+    * Ez a metódus nem módosítja a Vec2-t, hanem egy újat hoz létre belőle.
+    *
+    * @return Egy új, normalizált Vec2.
+    */
     Vec2 normalize() const
     {
         return *this / Vec2::distance(*this, {0, 0});
