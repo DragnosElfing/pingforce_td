@@ -93,7 +93,8 @@ project "pingforce_test"
 
     files {
         "test/memtrace.cpp",
-        "test/tests.cpp"
+        "test/tests.cpp",
+        "src/utils/parsers/*.cpp"
     }
 
     externalincludedirs {

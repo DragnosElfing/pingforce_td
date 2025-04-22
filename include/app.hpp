@@ -1,7 +1,5 @@
 #pragma once
 
-#include "all.hpp"
-
 #include "objects/object_base.hpp"
 #include "scene.hpp"
 
@@ -93,8 +91,7 @@ public:
     void pushQueue(MockObject const* o) { m_queue.push(o); }
     void getWindow() const;
 
-private:
-    //sf::RenderWindow* m_window = nullptr;
+//private:
     unsigned int m_width;
     unsigned int m_height;
     std::priority_queue<MockObject const*, std::vector<MockObject const*>, MockObject::Compare> m_queue;
@@ -201,11 +198,7 @@ private:
     bool m_running = false;
 
     /*! A renderer. */
-    #if defined(CPORTA) || defined(_PFTD_TEST)
-    MockRenderer* m_renderer = nullptr;
-    #else
     Renderer* m_renderer = nullptr;
-    #endif
 
     /*! A nézetek: [id, nézet]. */
     std::map<std::string, Scene*> m_scenes;

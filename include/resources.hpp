@@ -113,7 +113,7 @@ public:
     static MockResourceManager* create();
     static void destroy() { delete m_instance; }
 
-private:
+//private:
     MockResourceManager() = default;
 
     static MockResourceManager* m_instance;

@@ -1,9 +1,10 @@
 #include "utils/parsers.hpp"
+#include "utils/substitute_types.hpp"
 
 using namespace pftd::utils::parser;
 
 LevelConfigParser::LevelConfigParser(std::string const& sourceFile):
-    Parser<>{sourceFile, "levelconfig"}
+    Parser{sourceFile, "levelconfig"}
 {
 
 }
@@ -31,7 +32,7 @@ void LevelConfigParser::parse()
     }
 }
 
-std::vector<std::pair<float, float>> LevelConfigParser::getAttribute(std::string name) const
+std::vector<pftd::utils::Vec2f> LevelConfigParser::getAttribute(std::string name) const
 {
     return m_attribs.at(name);
 }

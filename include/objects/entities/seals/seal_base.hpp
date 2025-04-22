@@ -68,15 +68,34 @@ public:
     void damage(int hpLost = 1);
 
 protected:
+    /**
+    * @brief
+    *
+    * @param followPath Az útvonal, amit követnie kell.
+    * @param spriteSrc A sprite-jának az elérési útvonala.
+    * @param size Méret.
+    * @param hp HP.
+    * @param speed Gyorsaság.
+    * @param value Érték: ennyi pénzt kap a játékos ha megöli.
+    * @param zIndex Z koordináta.
+    */
     Seal(FollowPath const& followPath, std::string const& spriteSrc, utils::Vec2f const& size, int hp, float speed, unsigned int value, int zIndex = 0);
     
     /*! Az útvonal amin végigmegy. */
     FollowPath const& followPath;
     
     // Interpolációhoz
+
+    /*! 0-tól 1-ig terjedő paraméter az interpolációhoz. */
     float lerpParam = 0.0f;
+
+    /*! Elérte e a fészket. */
     bool reachedNest = false;
+
+    /*! Visszatért e a kezdő ponthoz. */
     bool returned = false;
+
+    /*! A következő pont az útvonalon. */
     EndPoint nextPoint;
 
 private:

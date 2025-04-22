@@ -102,10 +102,9 @@ public:
     virtual void onEvent(int event) = 0;
     virtual void update(float dt) = 0;
     
-protected:
+//protected:
     bool isActive = false;
     ObjPtrVec objects;
-    //sf::Music* backgroundMusic = nullptr;
     
 };
 

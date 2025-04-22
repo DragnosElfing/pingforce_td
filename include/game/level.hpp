@@ -15,27 +15,42 @@ class Level : public Object
 {
 public:
     /*! Fészek. */
-    struct Nest // TODO: should inherit from Object
+    struct Nest : public Entity
     {
-        utils::Vec2f position;
-        int const radius = 110;
-        gr::Sprite* sprite = nullptr;
+        /*! Az a környezete, amelybe tornyot nem lehet tenni. */
+        int const radiusPixel = 110;
 
-        explicit Nest(sf::Texture const& texture, utils::Vec2f const& position);
+        /**
+        * @brief A pozíción kívül minden más hard code-olt.
+        *
+        * @param position Pozíció.
+        */
+        explicit Nest(utils::Vec2f const& position);
         Nest(Nest const& other) = default;
+
         ~Nest();
     };
 
     /*! Játékállás / statisztika. */
     struct Stats : public Serializable
     {
+        /*! A maximum HP. */
         int const MAX_HP = 3;
+
+        /*! Jelenlegi HP. */
         int hp = MAX_HP;
+
+        /*! Pontszám. */
         unsigned int score = 0U;
+
+        /*! Pénz. */
         unsigned int money = 100U;
 
         explicit Stats();
         explicit Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth);
+
+        void serialize(std::ostream& out);
+        void deserialize(std::istream& in);
     };
 
     /*! Játékos statisztika. */

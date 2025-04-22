@@ -1,6 +1,5 @@
+#include "all.hpp"
 #include "app.hpp"
-#include "scenes/menu.hpp"
-#include "scenes/game.hpp"
 
 using namespace pftd;
 

@@ -6,7 +6,7 @@ namespace pftd
 {
 
 #if not defined(_PFTD_TEST) && not defined(CPORTA)
-/*! Látható programelemek. */
+/*! Programelemek. */
 class Object : public sf::Drawable
 {
 public:

@@ -5,7 +5,10 @@
 namespace pftd {
 namespace utils {
 
-/*! Olyan osztályok, amelyek tárolóként (is) használhatók. */
+/*! 
+    Olyan osztályok, amelyek tárolóként (is) használhatók.
+    Ilyen például: `FollowPath`, `Inventory`.
+*/
 template<typename T, typename C = std::vector<T*>>
 class Container
 {

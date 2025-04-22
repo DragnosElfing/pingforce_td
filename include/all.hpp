@@ -1,5 +1,7 @@
 #pragma once
 
+// Ez egy precompiled header fájl.
+
 // STL
 #include <cmath>
 #include <vector>
@@ -27,4 +29,3 @@
 // Own
 #include "utils/logger.hpp"
 #include "utils/substitute_types.hpp"
-#include "resources.hpp"

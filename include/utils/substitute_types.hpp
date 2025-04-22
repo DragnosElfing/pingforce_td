@@ -31,7 +31,7 @@ struct Vec2
     * @param v2 Másik vektor.
     * @return A távolság.
     */
-    static T distance(Vec2 const& v1, Vec2 const& v2)
+    static float distance(Vec2 const& v1, Vec2 const& v2)
     {
         return std::sqrt((v2.x-v1.x)*(v2.x-v1.x) + (v2.y-v1.y)*(v2.y-v1.y));
     }
@@ -66,6 +66,14 @@ struct Vec2
     {
         return {this->x * scalar, this->y * scalar};
     }
+    bool operator==(Vec2 other) const
+    {
+        return this->x == other.x && this->y == other.y;
+    }
+    bool operator!=(Vec2 other) const
+    {
+        return !(this == other);
+    }
 
     Vec2& operator=(Vec2 const& right)
     {
@@ -83,6 +91,7 @@ struct Vec2
     }
 };
 
+// Az SFML is ilyet csinál.
 using Vec2i = Vec2<int>;
 using Vec2f = Vec2<float>;
 

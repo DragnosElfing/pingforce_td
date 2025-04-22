@@ -9,7 +9,7 @@ class Snowball : public Projectile
 {
 public:
     /**
-    * @brief
+    * @brief A textúra hard code-olt.
     *
     * @param position Pozíció.
     * @param direction Irány.
