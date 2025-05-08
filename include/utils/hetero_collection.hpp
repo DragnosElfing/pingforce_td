@@ -6,8 +6,10 @@ namespace pftd {
 namespace utils {
 
 /*! 
-    Olyan osztályok, amelyek tárolóként (is) használhatók.
+    Olyan osztályok, amelyek tárolóként (is) használhatók. Fontos: nem egy tárolót tartalmaznak, hanem azok maguk a tárolók (öröklés, nem kompozíció)!
     Ilyen például: `FollowPath`, `Inventory`.
+
+    Megjegyzés: iterátorokat nem tartalmaz, de elérhető a `getContainer()`.
 */
 template<typename T, typename C = std::vector<T*>>
 class Container
@@ -32,15 +34,11 @@ public:
         try {
             m_container.push_back(elem);
         } catch(std::runtime_error err) {
-            throw std::runtime_error{err.what()}; // TODO: ezt ne így, nincs sok értelme
+            print(err.what());
         }
 
         return elem;
     }
-
-    // ? Nem biztos, hogy kelleni fog bármikor is.
-    // template<typename Pred>
-    // void remove(Pred);
 
     /**
     * @brief A tároló mérete.

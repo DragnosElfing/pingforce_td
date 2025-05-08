@@ -1,16 +1,18 @@
 #pragma once
 
 #include "all.hpp"
-
-#if not defined(_PFTD_TEST) && not defined(CPORTA)
 #include "SFML/Window/Event.hpp"
-#endif
-
 #include "objects/object_base.hpp"
 
-namespace pftd {
+namespace pftd 
+{
 
-#if not defined(_PFTD_TEST) && not defined(CPORTA)
+enum class SceneStateFlag : uint8_t
+{
+    NONE = 0,
+    LOAD_STATE = 1 << 0
+};
+
 /*! Nézet ősosztály. */
 class Scene 
 {
@@ -41,7 +43,7 @@ public:
     ObjPtrVec& getObjects() { return objects; }
 
     /**
-    * @brief `objects` getter.
+    * @brief Zene beállítása (loopon megy amíg aktív a nézet).
     *
     * @param source A hangfájl elérési útvonala.
     * @param volume A zene hangereje.
@@ -49,12 +51,9 @@ public:
     void setMusic(std::string const& source, float volume = 100.0f);
 
     /**
-    * @brief Nézet aktiválása/deaktiválása.
-    *
-    * @param active Aktiválás e?
-    * @return Történt e állapot változás.
+    * @brief Nézet aktiválása/deaktiválása: aktív -> nem aktív VAGY nem aktív -> aktív.
     */
-    virtual bool toggleActive(bool active);
+    virtual void toggleActive(SceneStateFlag flag = SceneStateFlag::NONE);
 
     /**
     * @brief Delegált események kezelése.
@@ -79,32 +78,6 @@ protected:
 
     /*! Háttérzene. */
     sf::Music* backgroundMusic = nullptr;
-    
-};
-#endif
-
-/*! Tesztelésre szánt nézet ősosztály. */
-class MockScene 
-{
-    using ObjPtrVec = std::vector<MockObject*>;
-public:
-    MockScene() = default;
-
-    MockScene(MockScene const&) = delete;
-    MockScene(MockScene&&) noexcept = delete;
-    
-    virtual ~MockScene();
-
-    ObjPtrVec const& getObjects() const { return objects; }
-    ObjPtrVec& getObjects() { return objects; }
-    void setMusic(std::string const& source, float volume = 100.0f);
-    virtual bool toggleActive(bool active);
-    virtual void onEvent(int event) = 0;
-    virtual void update(float dt) = 0;
-    
-//protected:
-    bool isActive = false;
-    ObjPtrVec objects;
     
 };
 

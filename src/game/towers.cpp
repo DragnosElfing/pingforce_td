@@ -11,12 +11,13 @@ Snowballer::Snowballer(utils::Vec2f const& position, int zIndex):
 {
     price = 100U;
     attackRangePixel = 400.0f;
+    id = TowerID::SNOWBALLER;
 }
 
 Snowballer::Snowballer():
     Snowballer{{-1000, -1000}, 1}
 {
-
+    
 }
 
 Tower* Snowballer::clone() const
@@ -45,6 +46,7 @@ IcicleStabber::IcicleStabber(utils::Vec2f const& position, int zIndex):
     price = 150U;
     attackRangePixel = 150.0f;
     instantAttack = true;
+    id = TowerID::ICICLE_STABBER;
 }
 
 IcicleStabber::IcicleStabber():

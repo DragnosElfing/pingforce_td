@@ -1,13 +1,18 @@
 #include "game/level.hpp"
 // TODO: put these inside a single header file
+#include "objects/entities/entity_base.hpp"
 #include "objects/entities/projectiles/projectile_base.hpp"
 #include "objects/entities/projectiles/snowball.hpp"
 #include "objects/entities/seals/cub.hpp"
 #include "objects/entities/seals/fortified_zombie_cub.hpp"
 #include "objects/entities/seals/regular.hpp"
 #include "objects/entities/seals/zombie.hpp"
+#include "objects/entities/towers/iciclestabber.hpp"
+#include "objects/entities/towers/snowballer.hpp"
+#include "utils/parsers.hpp"
 #include "utils/random_gen.hpp"
 #include "app.hpp"
+#include "resources.hpp"
 
 using namespace pftd;
 using Stats = Level::Stats;
@@ -25,19 +30,29 @@ Stats::Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth):
 {
 
 }
+
+void Stats::serialize(std::ostream& out) const
+{
+    out << score << " " << money << " " << hp;
+}
 ///
 
 /// Nest
-Nest::Nest(sf::Texture const& texture, utils::Vec2f const& position):
-    position{position}, 
-    sprite{new gr::Sprite{texture, {{0, 0}, {1024, 1024}}, position, {2.0f*radius, 2.0f*radius}, 1}}
+Nest::Nest(utils::Vec2f const& position):
+    Entity{ResourceManager::getInstance()->getTexture("res/images/eggs.png"), 
+        {1024, 1024}, position, {2.0f*110, 2.0f*110}, 1}
 {
 
 }
 
 Nest::~Nest()
 {
-    delete sprite;
+    
+}
+
+Nest* Nest::clone() const
+{
+    return new Nest{position};
 }
 ///
 
@@ -49,19 +64,99 @@ FP::FollowPath()
 ///
 
 /// Level
-Level::Level(Stats stats):
+Level::Level(std::string const& saveFile, Stats stats):
     Object{{}, {}},
 
     stats{stats},
-    config{"res/data/level.conf"}
+    config{"res/data/level.conf"},
+    saveFile{saveFile}
 {
     config.parse();
 
-    nest = new Nest{ResourceManager::getInstance()->getTexture("res/images/eggs.png"), 
-        {config.getAttribute("nestPosition")[0].first, config.getAttribute("nestPosition")[0].second}};
+    nest = new Nest{config.getAttribute("nestPosition")[0]};
 
     for(auto& [x, y] : config.getAttribute("followPath")) {
         followPath.append(new utils::Vec2{x, y});
+    }
+    followPath.append(new utils::Vec2{nest->getPosition()});
+}
+
+Level::Level(std::string const& saveFile):
+    Object{{}, {}},
+
+    config{"res/data/level.conf"},
+    saveFile{saveFile}
+{
+    // Először a konfig.
+    config.parse();
+    nest = new Nest{config.getAttribute("nestPosition")[0]};
+    for(auto& [x, y] : config.getAttribute("followPath")) {
+        followPath.append(new utils::Vec2{x, y});
+    }
+
+    // Utánna a mentett állás.
+    utils::parser::SaveFileParser saveFileP {saveFile};
+    try {
+        saveFileP.parse();
+    } catch(utils::parser::ParseError err) {
+        print(err.what());
+    }
+
+    auto sInf = saveFileP.getStats();
+    stats.hp = stats.MAX_HP;
+    this->loseHP(stats.hp - sInf.hp);
+    stats.money = sInf.wealth;
+    stats.score = sInf.score;
+
+    for(auto const& eInf : saveFileP.getEntities()) {
+        switch(eInf.entityType) {
+        case utils::parser::SaveFileParser::EntityType::TOWER:
+            switch(eInf.towerID) {
+            case static_cast<int>(TowerID::SNOWBALLER):
+                towers.push_back(new Snowballer{eInf.position});
+                break;
+            case static_cast<int>(TowerID::ICICLE_STABBER):
+                towers.push_back(new IcicleStabber{eInf.position});
+                break;
+            default: break; 
+            }
+
+            towers.back()->setProjSpawnCb([this](Projectile* projectile){
+                projectiles.push_back(std::move(projectile));
+            });
+
+            break;
+        case utils::parser::SaveFileParser::EntityType::SEAL:
+            switch(eInf.seal.sealID) {
+            case static_cast<int>(SealID::REGULAR):
+                seals.push_back(new RegularSeal{followPath});
+                break;
+            case static_cast<int>(SealID::ZOMBIE):
+                seals.push_back(new ZombieSeal{followPath});
+                break;
+            case static_cast<int>(SealID::CUB):
+                seals.push_back(new Cub{followPath});
+                break;
+            case static_cast<int>(SealID::FZC):
+                seals.push_back(new FZC{followPath});
+                break;
+            default: break;
+            }
+
+            seals.back()->setLerpState(eInf.seal.lerpParam, eInf.seal.goingBackwards);
+
+            break;
+        case utils::parser::SaveFileParser::EntityType::PROJECTILE:
+            switch(eInf.proj.projID) {
+            case static_cast<int>(ProjectileID::SNOWBALL):
+                projectiles.push_back(new Snowball{eInf.position, eInf.proj.direction, eInf.proj.speed});
+                break;
+            default: break; 
+            }
+
+            break;
+        default: break;
+        }
     }
 }
 
@@ -87,7 +182,7 @@ void Level::loseHP(int hpLost)
         stats.hp -= hpLost;
     }
 
-    nest->sprite->setSpriteRect({{(stats.MAX_HP - stats.hp)*1024, 0}, {1024, 1024}});
+    nest->getSprite()->setSpriteRect({{(stats.MAX_HP - stats.hp)*1024, 0}, {1024, 1024}});
 }
 
 bool Level::placeTower()
@@ -103,7 +198,7 @@ bool Level::placeTower()
 
     if(stats.money >= selectedTower->price) {
         stats.money -= selectedTower->price;
-        towers.push_back(std::move(selectedTower));
+        towers.push_back(selectedTower);
         towers.back()->setProjSpawnCb([this](Projectile* projectile){
             projectiles.push_back(std::move(projectile));
         });
@@ -127,7 +222,7 @@ void Level::deselectTower()
 void Level::selectTower(Tower* newTower)
 {
     this->deselectTower();
-    selectedTower = newTower; // TODO: clone method for entities
+    selectedTower = newTower->clone();
 }
 
 void Level::spawnSeal()
@@ -225,8 +320,38 @@ bool Level::isGameOver() const
     return stats.hp <= 0;
 }
 
+void Level::save() const
+{
+    std::ofstream save_f {saveFile};
+    if(!save_f.is_open()) {
+        throw std::runtime_error{"Nem lehetett megnyitni a mentés fájlt!"};
+    }
+
+    save_f << "pingforce\n";
+    save_f << "\n# stats\n";
+    stats.serialize(save_f);
+
+    save_f << "\n# entities\n";
+    for(auto const& tower : towers) {
+        if(tower) {
+            tower->serialize(save_f);
+        } else {
+            print("nullptr");
+        }
+    }
+    for(auto const& seal : seals) {
+        seal->serialize(save_f);
+    }
+    for(auto const& proj : projectiles) {
+        proj->serialize(save_f);
+    }
+
+    save_f.close();
+}
+
 void Level::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+    if(nest) nest->draw(target, states);
     for(auto& tower : towers) {
         tower->draw(target, states);
     }
@@ -237,7 +362,6 @@ void Level::draw(sf::RenderTarget& target, sf::RenderStates states) const
         proj->draw(target, states);
     }
 
-    if(nest) nest->sprite->draw(target, states);
     if(selectedTower) selectedTower->draw(target, states);
 }
 

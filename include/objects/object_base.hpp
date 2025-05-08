@@ -5,7 +5,6 @@
 namespace pftd
 {
 
-#if not defined(_PFTD_TEST) && not defined(CPORTA)
 /*! Programelemek. */
 class Object : public sf::Drawable
 {
@@ -58,41 +57,6 @@ protected:
     utils::Vec2f position;
 
     /*! Méret (szélesség x magasság). */
-    utils::Vec2f size;
-
-};
-#endif
-
-/*! Teszteléshez használt programelem. */
-class MockObject
-{
-public:
-    MockObject() = default;
-    MockObject(utils::Vec2f position, utils::Vec2f size, int zIndex = 0):
-        zIndex{zIndex}, position{position}, size{size}
-    {}
-    MockObject(MockObject const&) = default;
-    MockObject(MockObject&&) noexcept = default;
-    virtual ~MockObject() = default;
-
-    virtual void draw() const = 0;
-
-    struct Compare
-    {
-        bool operator()(MockObject const& o1, MockObject const& o2) const
-        {
-            return o1.zIndex > o2.zIndex;
-        };
-
-        bool operator()(MockObject const* o1, MockObject const* o2) const
-        {
-            return this->operator()(*o1, *o2);
-        };
-    };
-
-protected:
-    int zIndex = 0;
-    utils::Vec2f position;
     utils::Vec2f size;
 
 };

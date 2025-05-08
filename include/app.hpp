@@ -5,7 +5,6 @@
 
 namespace pftd {
 
-#if not defined(_PFTD_TEST) && not defined(CPORTA)
 /*! A renderer. */
 class Renderer final
 {
@@ -71,32 +70,6 @@ private:
     std::priority_queue<Object const*, std::vector<Object const*>, Object::Compare> m_queue;
 
 };
-#endif
-
-/*! A tesztelésre használt renderer: funkcionalitása majdnem megegyezik a valódiéval, de valójában nem jelenít meg semmit. */
-class MockRenderer final
-{
-    friend class App;
-public:
-    MockRenderer(unsigned int width, unsigned int height, std::string const& windowTitle);
-
-    MockRenderer(MockRenderer const&) = delete;
-    MockRenderer(MockRenderer&&) = delete;
-    
-    ~MockRenderer();
-
-    void render();
-    void clear() const;
-    void display() const;
-    void pushQueue(MockObject const* o) { m_queue.push(o); }
-    void getWindow() const;
-
-//private:
-    unsigned int m_width;
-    unsigned int m_height;
-    std::priority_queue<MockObject const*, std::vector<MockObject const*>, MockObject::Compare> m_queue;
-
-};
 
 /*! Az egész játékért felelő osztály. */
 class App final
@@ -138,7 +111,7 @@ public:
     * @param id Az új nézet azonosítója.
     * @return Sikerült e váltani.
     */
-    bool changeScene(std::string id);
+    bool changeScene(std::string id, SceneStateFlag flag = SceneStateFlag::NONE);
 
     /**
     * @brief `m_running` getter.

@@ -4,12 +4,13 @@
 
 #include "objects/gui/image.hpp"
 #include "objects/object_base.hpp"
-#include "objects/serializable.hpp"
+#include "utils/serializable.hpp"
 
-namespace pftd {
+namespace pftd 
+{
 
 /*! Mindenféle "actor" ősosztálya: tornyok, fólák és lövedékek. */
-class Entity : public Object, public Serializable
+class Entity : public Object
 {
 public:
     /*! Animált e? */
@@ -71,6 +72,13 @@ public:
     */
     gr::Sprite* getSprite() { return currentSprite; }
 
+    /**
+    * @brief `spriteSheet` getter.
+    *
+    * @return A sprite sheet.
+    */
+    auto& getSpriteSheet() const { return spriteSheet; }
+
 protected:
     /*! A sprite sheet. */
     sf::Texture const& spriteSheet; // Feltételezzük, hogy egy sorban vannak a sprite-ok
@@ -97,6 +105,8 @@ protected:
     * @brief Animáció: képkocka léptetése. 
     */
     virtual void advanceAnimationFrame();
+
+    virtual void resetAnimation();
 
 };
 

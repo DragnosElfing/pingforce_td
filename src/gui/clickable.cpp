@@ -22,6 +22,8 @@ void Clickable::setCallback(std::function<void()> callback)
 
 void Clickable::handleClick(utils::Vec2i const& clickCoords)
 {
+    if(!isActive) return;
+    
     auto& xF = clickCoords.x;
     auto& yF = clickCoords.y;
 

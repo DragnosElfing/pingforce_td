@@ -56,6 +56,16 @@ Sprite::Sprite(Sprite&& other) noexcept:
 
 }
 
+void Sprite::scale(utils::Vec2f const& factor)
+{
+    m_sprite.setScale({m_sprite.getScale().x * factor.x, m_sprite.getScale().y * factor.y});
+}
+
+void Sprite::flipY()
+{
+    this->scale({-1.0f, 1.0f});
+}
+
 void Sprite::modColor(sf::Color const& color)
 {
     m_sprite.setColor(color);

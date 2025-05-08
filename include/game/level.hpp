@@ -4,7 +4,7 @@
 #include "objects/entities/projectiles/projectile_base.hpp"
 #include "objects/entities/seals/seal_base.hpp"
 #include "objects/entities/towers/tower_base.hpp"
-#include "objects/serializable.hpp"
+#include "utils/serializable.hpp"
 #include "utils/parsers.hpp"
 
 namespace pftd 
@@ -29,10 +29,12 @@ public:
         Nest(Nest const& other) = default;
 
         ~Nest();
+
+        Nest* clone() const override;
     };
 
     /*! Játékállás / statisztika. */
-    struct Stats : public Serializable
+    struct Stats : public utils::Serializable
     {
         /*! A maximum HP. */
         int const MAX_HP = 3;
@@ -49,12 +51,11 @@ public:
         explicit Stats();
         explicit Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth);
 
-        void serialize(std::ostream& out);
-        void deserialize(std::istream& in);
+        void serialize(std::ostream& out) const override;
     };
 
     /*! Játékos statisztika. */
-    Stats stats;
+    Stats stats = Stats{};
 
     /*! Lehelyezni kívánt torony. */
     Tower* selectedTower = nullptr;
@@ -64,7 +65,8 @@ public:
     *
     * @param stats Kezdeti játékállás.
     */
-    Level(Stats stats = Stats{});
+    Level(std::string const& saveFile, Stats stats);
+    Level(std::string const& saveFile);
     virtual ~Level();
 
     /**
@@ -109,6 +111,8 @@ public:
     */
     bool isGameOver() const;
 
+    void save() const;
+
     /**
     * @brief Objektum megjelenítése.
     *
@@ -135,6 +139,9 @@ protected:
 
     /*! Inicializáláshoz szükséges konfiguráció. */
     utils::parser::LevelConfigParser config;
+
+    /*! Mentésfájl. */
+    std::string saveFile;
 
     /**
     * @brief Ellenfél spawnolás.

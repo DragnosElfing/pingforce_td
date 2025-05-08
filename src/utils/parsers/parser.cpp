@@ -65,6 +65,7 @@ bool Parser::isLabelValid(bool skip)
 
 char Parser::peekAhead()
 {
+    // Minden fölös karaktert skippelünk addig.
     this->_skipWhitespace();
     while(sourceStream.peek() == commentDenoter) {
         this->_skipLine();

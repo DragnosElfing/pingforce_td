@@ -3,8 +3,10 @@
 #include <cmath>
 #include <ostream>
 
-namespace pftd {
-namespace utils {
+namespace pftd 
+{
+namespace utils 
+{
 
 /*! sf::Vector2 helyett használt matematikai vektor implementáció. */
 template<typename T>
@@ -86,8 +88,14 @@ struct Vec2
 
     friend std::ostream& operator<<(std::ostream& out, Vec2 const& vec)
     {
-        out << "(" << vec.x << " " << vec.y << ")";
+        out << vec.x << " " << vec.y;
         return out;
+    }
+
+    friend std::istream& operator>>(std::istream& in, Vec2& vec)
+    {
+        in >> vec.x >> vec.y;
+        return in;
     }
 };
 

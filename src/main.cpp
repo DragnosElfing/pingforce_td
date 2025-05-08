@@ -3,10 +3,6 @@
 #include "scenes/menu.hpp"
 #include "scenes/game.hpp"
 
-#ifdef CPORTA
-    #include "memtrace.h"
-#endif
-
 using namespace pftd;
 
 int main()

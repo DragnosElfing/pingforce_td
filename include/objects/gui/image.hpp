@@ -4,10 +4,11 @@
 
 #include "objects/object_base.hpp"
 
-namespace pftd {
-namespace gr {
+namespace pftd 
+{
+namespace gr 
+{
 
-#if not defined(_PFTD_TEST) && not defined(CPORTA)
 /*! Saját sprite osztály. Használható kép GUI elemként. */
 class Sprite final : public Object
 {
@@ -32,8 +33,17 @@ public:
 
     /**
     * @brief Y tengely mentén tükröz.
+    *
+    * Nincs használva.
     */
     void flipY();
+
+    /**
+    * @brief Nyújt.
+    *
+    * @param factor Ennyivel nyújt az X-Y tengelyek mentén.
+    */
+    void scale(utils::Vec2f const& factor);
 
     /**
     * @brief A textúra csak egy részletének használata Sprite-ként.
@@ -41,6 +51,8 @@ public:
     * @param textureRect A tárolt textúra része egy téglalappal megadva.
     */
     void setSpriteRect(sf::IntRect const& textureRect);
+
+    void setPosition(utils::Vec2f const& newPos) { m_sprite.setPosition({newPos.x, newPos.y}); }
 
     /**
     * @brief Objektum megjelenítése.
@@ -50,30 +62,12 @@ public:
     */
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-//private:
+private:
     /*! Sprite-hoz tartozó textúra. */
     sf::Texture const& m_texture;
 
     /*! Sprite. */
     sf::Sprite m_sprite;
-
-};
-#endif
-
-/*! Teszteléshez szánt Sprite. */
-class MockSprite final : public MockObject
-{
-public:
-    // MockSprite(sf::Texture const& texture, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = -1);
-    // MockSprite(sf::Texture const& texture, sf::IntRect const& textureRect, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = -1);
-    MockSprite(std::string const& imageSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = -1);
-    MockSprite(MockSprite const& other);
-    MockSprite(MockSprite&& other) noexcept;
-    ~MockSprite() = default;
-
-    void modColor(uint8_t color);
-    void setSpriteRect(utils::Vec2i const& textureRectStart, utils::Vec2i const& textureRectEnd);
-    void draw() const override;
 
 };
 

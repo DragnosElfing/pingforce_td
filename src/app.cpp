@@ -1,6 +1,8 @@
 #include "all.hpp"
 #include "app.hpp"
 
+#include "resources.hpp"
+
 using namespace pftd;
 
 /// Renderer
@@ -20,11 +22,10 @@ void Renderer::render()
 {
     this->clear();
     
-    while(!m_queue.empty()) {
+    // Megrajzolunk minden - a queue-ba helyezett - programelemet.
+    while(!m_queue.empty()) {  
         auto& obj = m_queue.top();
-        
         obj->draw(*m_window, {});
-        
         m_queue.pop();
     }
 
@@ -35,20 +36,21 @@ void Renderer::render()
 App::~App()
 {
     m_running = false;
+
     // Muszáj kondícionálisan, mert lehet (valójában biztos hogy nem, de meh) hogy sose volt meghívva az `App::create`.
     if(m_renderer) delete m_renderer;
-    ResourceManager::destroy();
     for(auto& [_, scene] : m_scenes) {
         delete scene;
     }
+    ResourceManager::destroy();
 }
 
 // Singleton instance
 App* App::m_instance = nullptr;
-// Muszáj App::destroy-t hívni ha már nem dolgozunk vele
+// Muszáj App::destroy-t hívni ha már nem dolgozunk vele.
 App* App::create(unsigned int width, unsigned int height, std::string const& title)
 {
-    // Ha már egyszer létre volt hozva
+    // Ha már egyszer létre volt hozva.
     if(m_instance) {
         delete m_instance;
     }
@@ -57,10 +59,9 @@ App* App::create(unsigned int width, unsigned int height, std::string const& tit
     
     I->m_renderer = new Renderer{width, height, title};
 
+    // ResourceManagerrel betöltjük a használt betűtípust (csak ezt az egy van használatban).
     ResourceManager::create();
-    if(!ResourceManager::getInstance()->loadDefaultFont("res/fonts/Gorditas/Gorditas-Bold.ttf")) {
-        throw "Nem lehetett megnyitni a betűtípust!";
-    }
+    ResourceManager::getInstance()->loadDefaultFont("res/fonts/Gorditas/Gorditas-Bold.ttf");
 
     I->m_running = true;
 
@@ -94,8 +95,13 @@ void App::run()
 
     sf::Clock clock;
     while(isRunning()) {
+        // Események delegálása.
         m_renderer->getWindow()->handleEvents(closeEvent, clickEvent, mouseMoveEvent, keyPressEvent);
+        
+        // Aktív nézet frissítése.
         m_scenes[m_activeSceneID]->update(clock.restart().asSeconds());
+
+        // Megjeleníteni kívánt elemek queue-ba helyezése, majd pedig render.
         for(auto& obj : m_scenes[m_activeSceneID]->getObjects()) {
             m_renderer->pushQueue(obj);
         }
@@ -103,25 +109,31 @@ void App::run()
     }
 }
 
-bool App::changeScene(std::string newID)
+bool App::changeScene(std::string newID, SceneStateFlag flag)
 {
+    // Már ez a nézet aktív.
     if(m_activeSceneID == newID) return false;
 
-    if(m_scenes.find(newID) == m_scenes.end()) throw SceneError{"Nincs ilyen scene."};
-
-    // A default érték, amikor még nincs egy scene sem
-    if(!m_activeSceneID.empty()) {
-        m_scenes[m_activeSceneID]->toggleActive(false);
+    // Hiba: nincs ilyen nézet!
+    if(m_scenes.find(newID) == m_scenes.end()) {
+        throw SceneError{"Nincs ilyen nézet."};
     }
+
+    // Ha nem volt még aktív nézet, akkor azt nem kell deaktiválni (a nagy semmit).
+    if(!m_activeSceneID.empty()) {
+        m_scenes[m_activeSceneID]->toggleActive(flag);
+    }
+
+    // Actual nézetváltás.
     m_activeSceneID = newID;
-    m_scenes[newID]->toggleActive(true);
+    m_scenes[newID]->toggleActive(flag);
 
     return true;
 }
 
 void App::addScene(std::string id, Scene* scene, bool setActive)
 {
-    // Ha már van ilyen ID
+    // Hiba: már van ilyen ID.
     if(m_scenes.find(id) != m_scenes.end()) {
         throw SceneError{"Használt ID."};
     }

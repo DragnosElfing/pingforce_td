@@ -39,10 +39,12 @@ void Button::setBackground(std::string const& id)
 
 void Button::handleClick(utils::Vec2i const& clickCoords)
 {
-    if(m_rect.contains({static_cast<float>(clickCoords.x), static_cast<float>(clickCoords.y)})) {
-        m_clickSound.play();
-        this->m_callback();
-    }
+    m_clickSound.play();
+    Clickable::handleClick(clickCoords);
+    // if(m_rect.contains({static_cast<float>(clickCoords.x), static_cast<float>(clickCoords.y)})) {
+    //     m_clickSound.play();
+    //     this->m_callback();
+    // }
 }
 
 void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const

@@ -11,15 +11,14 @@
 #include "utils/logger.hpp"
 #include "app.hpp"
 
+#define WIN_WIDTH static_cast<float>(App::getInstance()->getWindowWidth())
+#define WIN_HEIGHT static_cast<float>(App::getInstance()->getWindowHeight())
+
 using namespace pftd;
 
 /// Menu
 MenuScene::MenuScene()
 {
-    // Shorthandek
-    float const WIN_WIDTH = App::getInstance()->getWindowWidth();
-    float const WIN_HEIGHT = App::getInstance()->getWindowHeight();
-
     // Logó
     objects.push_back(new gr::Sprite{"res/images/logo.png", {50, App::getInstance()->getWindowHeight()/2.f - 360}, {620, 620}});
     
@@ -47,12 +46,17 @@ MenuScene::MenuScene()
     m_buttons.push_back(newGameButt);
 
     // Mentett betöltése
+    // Ellenőrzi, hogy létezik e a save fájl, és, hogy meg lehet e nyitni.
+    std::ifstream saveFile {GameScene::SAVE_FILE_PATH};
+    bool loadButtonActive = saveFile.good();
+    saveFile.close();
+
     auto loadGameButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Mentett betöltése", 34}, 
         {WIN_WIDTH - 400.0f, WIN_HEIGHT/2.f + 60}, 
-            {330, 110}, false};
+            {330, 110}, loadButtonActive};
     loadGameButt->setBackground("./res/images/button_bg.png");
     loadGameButt->setCallback([&self = loadGameButt](){ 
-        // TODO
+        App::getInstance()->changeScene("game", SceneStateFlag::LOAD_STATE);
     });
     m_buttons.push_back(loadGameButt);
 
@@ -84,15 +88,25 @@ void MenuScene::update(float)
 {
 
 }
+
+void MenuScene::toggleActive(SceneStateFlag)
+{
+    if(!isActive) {
+        std::ifstream saveFile {GameScene::SAVE_FILE_PATH};
+        m_buttons[1]->isActive = saveFile.good();
+        saveFile.close();
+    }
+
+    Scene::toggleActive();
+}
 ///
 
 /// InventoryItem
-GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, std::string const& iconSrc, sf::IntRect const& textureRect, 
-    utils::Vec2f const& position, utils::Vec2f const& size):
+GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, utils::Vec2f const& position, utils::Vec2f const& size):
     Clickable{position, size, 100},
 
     frame{"res/images/inventory_frame.png", position, size},
-    icon{ResourceManager::getInstance()->getTexture(iconSrc), textureRect, position, size, 100},
+    icon{tower->getSpriteSheet(), {{0, 0}, {1024, 1024}}, position, size, 100},
     towerToSpawn{std::move(tower)},
     priceLabel{{ResourceManager::getInstance()->getDefaultFont(), "$" + std::to_string(towerToSpawn->price), 21}, 
         {}, 100, sf::Color::Green}
@@ -111,7 +125,7 @@ GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, std::
 
 GameScene::InventoryItem::~InventoryItem()
 {
-    delete towerToSpawn;
+    if(towerToSpawn) delete towerToSpawn;
 }
 
 void GameScene::InventoryItem::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -145,10 +159,6 @@ void GameScene::Inventory::draw(sf::RenderTarget& target, sf::RenderStates state
 /// Game
 GameScene::GameScene()
 {
-    // Shorthandek
-    float const WIN_WIDTH = App::getInstance()->getWindowWidth();
-    float const WIN_HEIGHT = App::getInstance()->getWindowHeight();
-
     // Háttér
     objects.push_back(new gr::Sprite{"res/images/map.png", {0, 0}, {WIN_WIDTH - 180, WIN_HEIGHT}, -100});
     
@@ -156,7 +166,9 @@ GameScene::GameScene()
     m_saveButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Mentés & Kilépés", 18}, 
         {10,10},{180, 60}, true, 100};
     m_saveButt->setBackground("./res/images/button_bg.png");
-    m_saveButt->setCallback([&self = m_saveButt, this](){ 
+    m_saveButt->setCallback([&self = m_saveButt, this](){
+        m_hornSound.stop();
+        m_level->save();
         App::getInstance()->changeScene("menu");
     });
     objects.push_back(m_saveButt);
@@ -177,13 +189,15 @@ GameScene::GameScene()
     
     // Zene
     this->setMusic("res/audio/defend.mp3", 90);
+
+    // Szint (ekkor még biztosan null pointer)
+    m_level = new Level{GameScene::SAVE_FILE_PATH, Level::Stats{0, 0, 0, 0}};
+    objects.push_back(m_level);
 }
 
 GameScene::~GameScene()
 {
-    for(auto& item : m_inventory->getContainer()) {
-        delete item->towerToSpawn;
-    }
+
 }
 
 void GameScene::onEvent(sf::Event const& ev)
@@ -229,40 +243,43 @@ void GameScene::update(float dt)
     m_level->update(dt);
 }
 
-bool GameScene::toggleActive(bool active) 
+void GameScene::toggleActive(SceneStateFlag flag)
 {
-    if(active) {
+    if(!isActive) {
+        // TODO: no
+        if((static_cast<uint8_t>(flag) & static_cast<uint8_t>(SceneStateFlag::LOAD_STATE)) == static_cast<uint8_t>(SceneStateFlag::LOAD_STATE)) {
+            m_shouldLoadSaved = true;
+            where();
+        }
         this->startGame();
-    } else {
-        m_hornSound.stop();
     }
 
-    return Scene::toggleActive(active);
+    Scene::toggleActive(flag);
 }
 
 void GameScene::startGame()
 {
-    // Shorthandek
-    // TODO: macrokként inkább
-    float const WIN_WIDTH = App::getInstance()->getWindowWidth();
+    if(m_level) {
+        delete m_level;
+    }
 
-    if(m_level) delete m_level;
+    if(m_shouldLoadSaved) {
+        m_level = new Level{GameScene::SAVE_FILE_PATH};
+        m_shouldLoadSaved = false;
+    } else {
+        Level::Stats defStats {3, 3, 0, 250};
+        m_level = new Level{GameScene::SAVE_FILE_PATH, defStats};
+    }
 
-    Level::Stats defStats {3, 3, 0, 250};
-    m_level = new Level{defStats};
-
-    objects.push_back(m_level);
 
     // Inventory feltöltése
     // TODO: m_inventory should calculate the positions of its items and also define their size
     // Snowballer
-    auto snowballerTower = new InventoryItem{new Snowballer{}, m_level, "res/images/penguins/snowballer_peng.png", 
-    {{0, 0}, {1024, 1024}}, {WIN_WIDTH - 180, 10}, {170, 170}};
+    auto snowballerTower = new InventoryItem{new Snowballer{}, m_level, {WIN_WIDTH - 180, 10}, {170, 170}};
     m_inventory->append(snowballerTower);
     
     // IcicleStabber
-    auto icicleTower = new InventoryItem{new IcicleStabber{}, m_level, "res/images/penguins/iciclestabber_peng.png", 
-    {{0, 0}, {1024, 1024}}, {WIN_WIDTH - 180, 180+10+10}, {170, 170}};
+    auto icicleTower = new InventoryItem{new IcicleStabber{}, m_level, {WIN_WIDTH - 180, 180+10+10}, {170, 170}};
     m_inventory->append(icicleTower);
 
     m_hornSound.play();

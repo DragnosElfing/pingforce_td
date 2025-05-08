@@ -2,7 +2,11 @@
 
 #include "all.hpp"
 
-namespace pftd {
+namespace pftd 
+{
+namespace utils 
+{
+
 
 /*! Szérializálható osztályok. */
 class Serializable 
@@ -13,14 +17,17 @@ public:
     *
     * @param out A stream.
     */
-    virtual void serialize(std::ostream& out) = 0;
+    virtual void serialize(std::ostream& out) const = 0;
 
     /**
     * @brief Beolvas egy streamről.
     *
-    * @param out A stream.
+    * Megjegyzés: nincs használva, a `SaveFileParser` intézi.
+    *
+    * @param in A stream.
     */
-    virtual void deserialize(std::istream& in) = 0;
+    //virtual void deserialize(std::istream& in) = 0;
 };
 
+}
 }

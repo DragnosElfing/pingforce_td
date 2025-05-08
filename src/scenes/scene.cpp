@@ -1,4 +1,5 @@
 #include "scene.hpp"
+#include "resources.hpp"
 
 using namespace pftd;
 
@@ -19,25 +20,23 @@ void Scene::setMusic(std::string const& source, float volume)
 
     backgroundMusic = new sf::Music{};
     if(!backgroundMusic->openFromFile(source)) {
-        throw "Nem lehetett a hangfájlt megnyitni!";
+        throw LoadError{"Nem lehetett a hangfájlt megnyitni: " + source + '.'};
     }
 
     backgroundMusic->setLooping(true);
     backgroundMusic->setVolume(volume);
 }
 
-bool Scene::toggleActive(bool active)
+void Scene::toggleActive(SceneStateFlag)
 {
-    if(active == isActive) return false;
-    isActive = active;
+    isActive = !isActive;
 
-    if(active) {
+    // Alapból egy nézet legfeljebb zenét indít/állít meg.
+    if(isActive) {
         if(backgroundMusic) {
             backgroundMusic->play();
         }
     } else {
         backgroundMusic->stop();
     }
-
-    return true;
 }

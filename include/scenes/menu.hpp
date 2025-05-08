@@ -1,9 +1,7 @@
 #pragma once
 
-#include "objects/gui/image.hpp"
 #include "objects/gui/button.hpp"
 #include "scene.hpp"
-#include "resources.hpp"
 
 namespace pftd
 {
@@ -28,6 +26,8 @@ public:
     * @param dt Delta idő.
     */
     void update(float dt) override;
+
+    void toggleActive(SceneStateFlag flag = SceneStateFlag::NONE) override;
 
 private:
     /*! Gombok. */

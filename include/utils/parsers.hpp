@@ -65,6 +65,7 @@ public:
             this->_skipWhitespace();
         }
 
+        // Ha hibás? Nincs olyan...
         T got;
         sourceStream >> got;
         return got;
@@ -133,54 +134,87 @@ private:
 /*! Mentett játékállás betöltésére szolgál. */
 class SaveFileParser final : public Parser
 {
-    //? Ezeknek biztos nem itt kéne lennie.
-    // struct StatsInfo 
-    // {
-    //     unsigned int score, wealth, hp;
-    // };
-
-    // enum class EntityType 
-    // {
-    //     TOWER,
-    //     SEAL,
-    //     PROJECTILE
-    // };
-    // enum class TowerType
-    // {
-    //     SNOWBALLER = 0,
-    //     ICICLE_STABBER
-    // };
-    // enum class SealType
-    // {
-    //     REGULAR = 0,
-    //     CUB,
-    //     ZOMBIE,
-    //     FZC
-    // };
-
-    // struct EntityInfo 
-    // {
-    //     EntityType entityType;
-    //     union subtype {
-    //         TowerType towerType;
-    //         SealType sealType;
-    //     };
-    //     utils::Vec2f position;
-    //     unsigned int sealHP;
-    // };
-
 public:
+    /*! Mentett játék betöltéséhez használt statisztika osztály. */
+    struct StatsInfo 
+    {
+        unsigned int score, wealth;
+        int hp;
+    };
+
+    /*! Mentett játék betöltéséhez használt entitás típusok. */
+    enum class EntityType 
+    {
+        TOWER = 0U,
+        SEAL,
+        PROJECTILE
+    };
+
+    /*! Mentett játék betöltéséhez használt entitás infó. */
+    struct EntityInfo 
+    {
+        /*! Típusa. */
+        EntityType entityType;
+
+        /*! Pozíciója. */
+        utils::Vec2f position;
+
+        /*! Típustól függő egyéb adat. */
+        //union {
+            /*! Ellenfél típusra valló adatok. */
+            struct {
+                unsigned int sealID;
+                float lerpParam;
+                bool goingBackwards;
+                unsigned int hp;
+            } seal;
+
+            /*! Lövedék típusra valló adatok. */
+            struct {
+                unsigned int projID;
+                utils::Vec2f direction;
+                float speed;
+            } proj;
+
+            /*! Torony típusra valló adatok. */
+            unsigned int towerID;
+        //};
+    };
+
+//public:
     SaveFileParser(std::string const& sourceFile);
     ~SaveFileParser() = default;
 
     void parse() override;
 
-    // StatsInfo getStats() const;
-    // std::vector<EntityInfo> getEntities() const;
+    /**
+    * @brief Mentett statisztika beolvasása: pont, pénz, HP.
+    *
+    * @return A mentett statisztikát tartalmazó struktúra.
+    */
+    StatsInfo const& getStats() const { return m_readStats; };
+
+    /**
+    * @brief Mentett entitások beolvasása.
+    *
+    * @return Ezeket az entitásokat (azoknak a lényeges információját) tartalmazó lista.
+    */
+    std::vector<EntityInfo> const& getEntities() const { return m_entities; };
 
 private:
-    // StatsInfo m_readStats;
-    // std::vector<EntityInfo> m_entities;
+    /*! A beolvasott statisztika. */
+    StatsInfo m_readStats;
+
+    /*! A beolvasott entitás infók. */
+    std::vector<EntityInfo> m_entities;
+
+    void _getStats();
+    void _getEntity();
+};
+
+struct ParseError : std::runtime_error
+{
+    using std::runtime_error::runtime_error;
 };
 
 }

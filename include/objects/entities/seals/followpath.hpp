@@ -10,7 +10,7 @@ using EndPoint = utils::Vec2f;
 struct FollowPath : public utils::Container<EndPoint>
 {
     /**
-    * @brief A `Level`, amihez tartozik, "építi fel."
+    * @brief A `Level` - amihez tartozik - "építi fel."
     */
     FollowPath();
 };

@@ -3,7 +3,7 @@
 using namespace pftd::gr;
 
 Label::Label(sf::Text const& text, sf::Color const& color):
-m_text{text}
+    m_text{text}
 {
     m_text.setFillColor(color);
 }

@@ -3,11 +3,18 @@
 #include "objects/entities/entity_base.hpp"
 #include "objects/entities/projectiles/projectile_base.hpp"
 #include "objects/entities/seals/seal_base.hpp"
+#include "utils/serializable.hpp"
 
 namespace pftd {
 
+enum class TowerID 
+{
+    SNOWBALLER = 0,
+    ICICLE_STABBER
+};
+
 /*! Torony (pingvin). */
-class Tower : public Entity
+class Tower : public Entity, public utils::Serializable
 {
     using ProjSpawnFunc = std::function<void(Projectile*)>;
 public:
@@ -70,7 +77,11 @@ public:
     */
     virtual void update(float dt) override;
 
+    void serialize(std::ostream& out) const override;
+
 protected:
+    TowerID id;
+
     /*! Célpont. */
     Seal* target = nullptr;
 

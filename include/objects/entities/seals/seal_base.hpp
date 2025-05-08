@@ -7,8 +7,16 @@
 namespace pftd 
 {
 
+enum class SealID
+{
+    REGULAR = 0,
+    CUB,
+    ZOMBIE,
+    FZC
+};
+
 /*! Fóka. */
-class Seal : public Entity
+class Seal : public Entity, public utils::Serializable
 {
 public:
     /*! Éppen lopás közben van e? */
@@ -61,13 +69,30 @@ public:
     bool hasReachedNest() const { return reachedNest; }
 
     /**
+    * @brief
+    *
+    * Szükség van rá, amikor mentett állást töltünk.
+    */
+    void setLerpState(float param, bool backwards = false) 
+    { 
+        lerpParam = std::min(1.0f, std::max(param, 0.0f));
+        print(param << " " << lerpParam);
+        reachedNest = backwards;
+        print(reachedNest); 
+    }
+
+    /**
     * @brief Lesebzés.
     *
     * @param hpLost Ennyi HP-ja fog lemenni a fókának.
     */
     void damage(int hpLost = 1);
 
+    void serialize(std::ostream& out) const override;
+
 protected:
+    SealID id;
+
     /**
     * @brief
     *

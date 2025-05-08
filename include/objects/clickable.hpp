@@ -8,7 +8,6 @@
 namespace pftd
 {
 
-// TODO: create source file
 /*! Kattintható (interaktálható) objektum. */
 class Clickable : public Object
 {

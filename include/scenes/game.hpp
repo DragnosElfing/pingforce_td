@@ -14,6 +14,9 @@ namespace pftd
 class GameScene final : public Scene
 {
 public:
+    /*! Mentett játékállás fájlja. */
+    static constexpr char const* SAVE_FILE_PATH = "res/data/save.dat";
+
     /*! Az "eszköztárban" tárolt torony. */
     struct InventoryItem : public Clickable
     {
@@ -29,9 +32,7 @@ public:
         /*! Árcímke (felirat). */
         gr::Label priceLabel;
 
-        // TODO: remove iconSrc and textureRect params
-        InventoryItem(Tower* tower, Level * const level, std::string const& iconSrc, sf::IntRect const& textureRect, 
-            utils::Vec2f const& position, utils::Vec2f const& size);
+        InventoryItem(Tower* tower, Level * const level, utils::Vec2f const& position, utils::Vec2f const& size);
         ~InventoryItem();
 
         /**
@@ -86,10 +87,9 @@ public:
     /**
     * @brief Nézet aktiválása/deaktiválása.
     *
-    * @param isActive Aktiválás e?
     * @return Történt e állapot változás.
     */
-    bool toggleActive(bool isActive) override;
+    void toggleActive(SceneStateFlag flag = SceneStateFlag::NONE) override;
 
     /**
     * @brief Játék elindítása.
@@ -109,7 +109,8 @@ public:
     void updateWealth();
 
 private:
-    //gr::Sprite* m_mapBackground = nullptr;
+    /*! Be kell e tölteni a mentett játékállást. */
+    bool m_shouldLoadSaved = false;
 
     /*! Mentés gomb. */
     gr::Button* m_saveButt = nullptr;

@@ -1,0 +1,9 @@
+pingforce
+
+# stats
+200 250 2
+
+# entities
+seal 1 130.5 400.0 2
+seal 0 500.0 800.24 1
+penguin 1 100.81 70.10

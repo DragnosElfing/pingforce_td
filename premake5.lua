@@ -1,3 +1,5 @@
+local leak_file = "leak.txt"
+
 workspace "PingForce_TD"
     startproject "pingforce"
     configurations {
@@ -61,7 +63,7 @@ project "pingforce"
         filter "configurations:Debug"
             symbols "On"
             defines {
-                "_PFTD_DEBUG", "MEMTRACE"
+                "_PFTD_DEBUG"
             }
 
             buildoptions {
@@ -77,7 +79,11 @@ project "pingforce"
             externalwarnings "Off"
 
             disablewarnings {
-                "unused-lambda-capture"
+                "unused-lambda-capture",
+
+                -- GNU extensions
+                "gnu-anonymous-struct",
+                "nested-anon-types"
             }
             
         filter "configurations:Release"
@@ -92,20 +98,25 @@ project "pingforce_test"
     targetname "test"
 
     files {
-        "test/memtrace.cpp",
         "test/tests.cpp",
         "src/utils/parsers/*.cpp"
     }
 
+    includedirs {
+        "test/include"
+    }
+
     externalincludedirs {
-        "test",
         "include",
         "." -- memtrace.h és gtest_lite.h miatt, amit a JPorta szúr be
     }
 
     defines {
-        "MEMTRACE",
         "_PFTD_TEST"
+    }
+
+    postbuildcommands {
+        "valgrind --tool=memcheck --track-origins=yes --leak-check=full %{cfg.buildtarget.name} &> %{prj.location}/%{leak_file}"
     }
 
     filter {"system:linux", "action:gmake"}

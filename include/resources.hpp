@@ -1,15 +1,13 @@
 #pragma once
 
-#if not defined(_PFTD_TEST) && not defined(CPORTA)
 #include "SFML/Graphics.hpp"
 #include "SFML/Audio.hpp"
-#endif
 
 #include "objects/gui/image.hpp"
 
-namespace pftd {
+namespace pftd 
+{
 
-#if not defined(_PFTD_TEST) && not defined(CPORTA)
 /*! Az erőforrás-kezelő. */
 class ResourceManager final
 {
@@ -25,10 +23,11 @@ public:
     /**
     * @brief Az alapértelmezett (valójában csak ez van) betűtípus betöltése.
     *
+    * Megjegyzés: `LoadError`-t dob, ha nem tudja betölteni bármi miatt is.
+    *
     * @param path A betűtípus elérési útvonala.
-    * @return Sikerült e betölteni.
     */
-    bool loadDefaultFont(std::string const& path);
+    void loadDefaultFont(std::string const& path);
 
     /**
     * @brief Új vagy tárolt textúra megszerzése.
@@ -93,33 +92,6 @@ private:
 
     /*! Audio: [source, hang buffer példány] */
     std::unordered_map<std::string, sf::SoundBuffer> m_sounds;
-    
-};
-#endif
-
-/*! Az tesztelésre használt erőforrás-kezelő: funkcionalitása majdnem megegyezik a valódiéval, de valójában nem tárol konkrét erőforrásokat. */
-class MockResourceManager final
-{
-public:
-    MockResourceManager(MockResourceManager const&) = delete;
-    MockResourceManager(MockResourceManager&&) = delete;
-    ~MockResourceManager();
-
-    bool loadDefaultFont(std::string const& path);
-    int getTexture(std::string const& source);
-    int getSound(std::string const& source);
-
-    static MockResourceManager* getInstance() { return m_instance; }
-    static MockResourceManager* create();
-    static void destroy() { delete m_instance; }
-
-//private:
-    MockResourceManager() = default;
-
-    static MockResourceManager* m_instance;
-
-    std::unordered_map<std::string, int> m_textures;
-    std::unordered_map<std::string, int> m_sounds;
     
 };
 

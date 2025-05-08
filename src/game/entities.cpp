@@ -2,13 +2,14 @@
 #include "objects/entities/projectiles/projectile_base.hpp"
 #include "objects/entities/towers/tower_base.hpp"
 #include "objects/entities/seals/seal_base.hpp"
+#include "resources.hpp"
 
 using namespace pftd;
 
 /// Entity
 
 Entity::Entity(sf::Texture const& texture, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
-    Object{position - size / 2, size, zIndex},
+    Object{position, size, zIndex},
     spriteSheet{texture},
     cellSize{spriteSize},
     CELL_N{spriteSheet.getSize().x / cellSize.x},
@@ -17,7 +18,7 @@ Entity::Entity(sf::Texture const& texture, utils::Vec2i spriteSize, utils::Vec2f
 {
     currentSprite = new gr::Sprite{
         spriteSheet, {{static_cast<int>(currentCell * cellSize.x), 0}, {cellSize.x, cellSize.y}},
-        this->position, this->size, zIndex
+        this->position - this->size / 2, this->size, zIndex
     };
 }
 
@@ -67,7 +68,7 @@ void Entity::setPosition(utils::Vec2f position)
     this->position = position;
     if(this->getSprite()) {
         auto const newPos = position - size / 2;
-        this->getSprite()->m_sprite.setPosition(sf::Vector2f{newPos.x, newPos.y});
+        currentSprite->setPosition(newPos);
     }
 }
 
@@ -83,6 +84,15 @@ void Entity::advanceAnimationFrame()
 
         currentSprite->setSpriteRect({{static_cast<int>(currentCell * cellSize.x), 0}, {cellSize.x, cellSize.y}});
     }
+}
+
+void Entity::resetAnimation()
+{
+    if(!isAnimated) return;
+
+    currentCell = 0U;
+    totalElapsedSec = 0.0f;
+    currentSprite->setSpriteRect({{0, 0}, {cellSize.x, cellSize.y}});
 }
 ///
 
@@ -107,7 +117,8 @@ Tower::Tower(Tower const& other):
     radiusPixel{other.radiusPixel},
     attackRangePixel{other.attackRangePixel},
     attackSpeedSec{other.attackSpeedSec},
-    price{other.price}
+    price{other.price},
+    id{other.id}
 {
     frameDurationSec = attackSpeedSec / CELL_N;
 }
@@ -127,11 +138,17 @@ void Tower::attack()
 
 bool Tower::lookForTarget(std::vector<Seal*> const& enemies)
 {
-    // Ha már van target, nem keresünk újat.
-    //if(target) return true;
+    // Shorthand.
+    auto const inRange = [this](Seal* to) { 
+        return utils::Vec2f::distance(to->getPosition(), this->getPosition()) < attackRangePixel; 
+    };
 
+    // Ha már van target, akkor nem keresünk újat.
+    if(target && inRange(target)) {
+        return true;
+    }
     for(auto const& enemy : enemies) {
-        if(utils::Vec2f::distance(enemy->getPosition(), this->getPosition()) < attackRangePixel) {
+        if(inRange(enemy)) {
             target = enemy;
             return true;
         }
@@ -139,7 +156,9 @@ bool Tower::lookForTarget(std::vector<Seal*> const& enemies)
 
     target = nullptr;
     attackTimerSec = 0.0f;
+    Entity::resetAnimation();
     return false;
+
 }
 
 void Tower::update(float dt)
@@ -162,6 +181,11 @@ void Tower::advanceAnimationFrame()
         Entity::advanceAnimationFrame();
     }
 }
+
+void Tower::serialize(std::ostream& out) const
+{
+    out << "penguin " << static_cast<int>(id) << ' ' << position << '\n';
+}
 ///
 
 /// Seal
@@ -178,7 +202,7 @@ Seal::Seal(FollowPath const& followPath, std::string const& spriteSrc, utils::Ve
 
 void Seal::lerpPath()
 {
-    // https://www.desmos.com/calculator/bd4zr21hx0
+    // https://www.desmos.com/calculator/bd4zr21hx0 alapján (én készítettem)
 
     auto& points = followPath.getContainer();
     if(points.size() <= 1) return;
@@ -217,7 +241,8 @@ void Seal::damage(int hpLost)
     }
 
     if(hp > 0) {
-        uint8_t newGB = std::max(255 - 155 / hp, 0); // TODO: make this work
+        // Egyre pirosabbak, ahogy sebződnek.
+        uint8_t newGB = std::max(255 - 155 / hp, 0);
         this->getSprite()->modColor({255, newGB, newGB, 255});
     }
 }
@@ -237,25 +262,25 @@ void Seal::update(float dt)
         returned = true;
     }
 
-    if((position - nextPoint).x < 0) {
-        // TODO: flip sprite
-    }
+    // if((position - nextPoint).x < 0) {
+    //     this->getSprite()->flipY();
+    // }
 
     Entity::update(dt);
 }
 
 void Seal::advanceAnimationFrame()
 {
-    // TODO: no, keep a record of the original size instead
-    this->getSprite()->m_sprite.setScale({
-        this->size.x / this->getSprite()->m_sprite.getLocalBounds().size.x, 
-        this->size.y / this->getSprite()->m_sprite.getLocalBounds().size.y * (std::sin(2*totalElapsedSec)/8.0f + 1)
-    });
+    this->getSprite()->scale({1.0f, std::sin(2*totalElapsedSec*(speed / 10.0f))/50000.0f + 1.0f});
+}
+
+void Seal::serialize(std::ostream& out) const
+{
+    out << "seal " << static_cast<int>(id) << ' ' << position << ' ' << lerpParam << ' ' << reachedNest << ' ' << hp << '\n';
 }
 ///
 
 /// Projectile
-
 Projectile::Projectile(std::string const& spriteSrc, utils::Vec2f const& position, 
     utils::Vec2f const& size, utils::Vec2f const& direction, float speed, float angularSpeed, int zIndex):
     Entity{spriteSrc, position, size, zIndex},
@@ -270,7 +295,10 @@ Projectile::Projectile(std::string const& spriteSrc, utils::Vec2f const& positio
 void Projectile::update(float dt)
 {
     this->setPosition(this->getPosition() + direction * linearSpeed * dt);
-    //this->getSprite()->get().m_sprite.rotate(sf::radians(angularSpeedRadPerSec) * dt);
 }
 
+void Projectile::serialize(std::ostream& out) const
+{
+    out << "projectile " << static_cast<int>(id) << ' ' << position << ' ' << direction << ' ' << linearSpeed << '\n';
+}
 ///

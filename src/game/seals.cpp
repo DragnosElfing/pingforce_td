@@ -5,6 +5,7 @@
 #include "objects/entities/seals/cub.hpp"
 #include "objects/entities/seals/seal_base.hpp"
 #include "objects/entities/seals/zombie.hpp"
+#include "utils/random_gen.hpp"
 
 #ifndef _PFTD_DEBUG
     #define BANANACHANCE 0.01f
@@ -16,12 +17,11 @@ using namespace pftd;
 
 /// Regular
 RegularSeal::RegularSeal(FollowPath const& followpath):
-    Seal{followpath, 
-        // TODO: where Random static class?
-    static_cast<float>(rand()) / static_cast<float>(RAND_MAX) <= BANANACHANCE ? "res/images/seals/banana.png" : "res/images/seals/reg.png", 
+    Seal{followpath,
+    utils::Random::generate(std::uniform_real_distribution<float>()) <= BANANACHANCE ? "res/images/seals/banana.png" : "res/images/seals/reg.png", 
         {170, 170}, 2, 40.0f, 50}
 {
-
+    id = SealID::REGULAR;
 }
 
 Seal* RegularSeal::clone() const
@@ -34,7 +34,7 @@ Seal* RegularSeal::clone() const
 Cub::Cub(FollowPath const& followpath):
     Seal{followpath, "res/images/seals/cub.png", {130, 130}, 1, 65.0f, 50}
 {
-
+    id = SealID::CUB;
 }
 
 Seal* Cub::clone() const
@@ -47,7 +47,7 @@ Seal* Cub::clone() const
 ZombieSeal::ZombieSeal(FollowPath const& followpath):
     Seal{followpath, "res/images/seals/zom.png", {170, 170}, 5, 10.0f, 100}
 {
-
+    id = SealID::ZOMBIE;
 }
 
 Seal* ZombieSeal::clone() const
@@ -60,7 +60,7 @@ Seal* ZombieSeal::clone() const
 FZC::FZC(FollowPath const& followpath):
     Seal{followpath, "res/images/seals/fzc.png", {130, 130}, 10, 15.0f, 200}
 {
-
+    id = SealID::FZC;
 }
 
 Seal* FZC::clone() const
