@@ -17,6 +17,7 @@ public:
     * @param text Szöveg objektum: maga a szöveg, betűtípus és betűméret.
     * @param color Betűszín.
     */
+    // TODO: pass in string and font seperately, dont rely on temp values
     Label(sf::Text const& text, sf::Color const& color = sf::Color::White);
 
     /**

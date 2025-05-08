@@ -107,7 +107,7 @@ GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, utils
 
     frame{"res/images/inventory_frame.png", position, size},
     icon{tower->getSpriteSheet(), {{0, 0}, {1024, 1024}}, position, size, 100},
-    towerToSpawn{std::move(tower)},
+    towerToSpawn{tower},
     priceLabel{{ResourceManager::getInstance()->getDefaultFont(), "$" + std::to_string(towerToSpawn->price), 21}, 
         {}, 100, sf::Color::Green}
 {
@@ -189,10 +189,6 @@ GameScene::GameScene()
     
     // Zene
     this->setMusic("res/audio/defend.mp3", 90);
-
-    // Szint (ekkor még biztosan null pointer)
-    m_level = new Level{GameScene::SAVE_FILE_PATH, Level::Stats{0, 0, 0, 0}};
-    objects.push_back(m_level);
 }
 
 GameScene::~GameScene()
@@ -259,8 +255,12 @@ void GameScene::toggleActive(SceneStateFlag flag)
 
 void GameScene::startGame()
 {
+    //bool firstTime = !m_level;
     if(m_level) {
+        // TODO: tényleg ideiglenes jó
+        objects.erase(std::remove(objects.begin(), objects.end(), m_level));
         delete m_level;
+        m_level = nullptr;
     }
 
     if(m_shouldLoadSaved) {
@@ -271,6 +271,9 @@ void GameScene::startGame()
         m_level = new Level{GameScene::SAVE_FILE_PATH, defStats};
     }
 
+    if(true) {
+        objects.push_back(m_level);
+    }
 
     // Inventory feltöltése
     // TODO: m_inventory should calculate the positions of its items and also define their size

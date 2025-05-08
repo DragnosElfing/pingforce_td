@@ -25,7 +25,7 @@ void LevelConfigParser::parse()
         
         // Fészek infót kaptunk.
         if(m_lastAttribute == "nestPosition") {
-            m_attribs[m_lastAttribute] = {{this->get<float>(), this->get<float>()}};
+            m_attribs[m_lastAttribute] = {this->get<utils::Vec2f>()};
 
         // Követési útvonal infót kaptunk.
         } else if(m_lastAttribute == "followPath") {

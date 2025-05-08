@@ -144,9 +144,10 @@ bool Tower::lookForTarget(std::vector<Seal*> const& enemies)
     };
 
     // Ha már van target, akkor nem keresünk újat.
-    if(target && inRange(target)) {
-        return true;
-    }
+    // if(target && inRange(target)) {
+    //     return true;
+    // }
+
     for(auto const& enemy : enemies) {
         if(inRange(enemy)) {
             target = enemy;

@@ -162,6 +162,7 @@ Level::Level(std::string const& saveFile):
 
 Level::~Level()
 {
+    if(selectedTower) delete selectedTower;
     if(nest) delete nest;
     for(auto& tower : towers) {
         delete tower;
@@ -198,11 +199,11 @@ bool Level::placeTower()
 
     if(stats.money >= selectedTower->price) {
         stats.money -= selectedTower->price;
-        towers.push_back(selectedTower);
+        towers.push_back(selectedTower->clone());
         towers.back()->setProjSpawnCb([this](Projectile* projectile){
             projectiles.push_back(std::move(projectile));
         });
-        selectedTower = nullptr;
+        this->deselectTower();
         
         return true;
     } else {
@@ -213,7 +214,7 @@ bool Level::placeTower()
 
 void Level::deselectTower()
 {
-    if(selectedTower != nullptr) {
+    if(selectedTower) {
         delete selectedTower;
         selectedTower = nullptr;
     }
@@ -246,14 +247,6 @@ void Level::spawnSeal()
 
 void Level::update(float dt)
 {
-    for(auto tower : towers) {
-        tower->update(dt);
-        tower->lookForTarget(seals);
-    }
-
-    for(auto& proj : projectiles) {
-        proj->update(dt);
-    }
     
     // Non-linear hozzáférés az elemekhez
     for(auto it = seals.begin(); it != seals.end();) {
@@ -263,6 +256,7 @@ void Level::update(float dt)
             stats.money += seal->value;
             stats.score += seal->value * 3;
             delete seal;
+            seal = nullptr;
             it = seals.erase(it);
         } else {
             if(seal->isCurrentlyStealing) {
@@ -302,6 +296,15 @@ void Level::update(float dt)
         if(!deletion) {
             it = std::next(it);
         }
+    }
+    
+    for(auto tower : towers) {
+        tower->update(dt);
+        tower->lookForTarget(seals);
+    }
+
+    for(auto& proj : projectiles) {
+        proj->update(dt);
     }
 
     if(m_accuTimeSpawnSec >= 1.0f) {

@@ -23,7 +23,7 @@ void Renderer::render()
     this->clear();
     
     // Megrajzolunk minden - a queue-ba helyezett - programelemet.
-    while(!m_queue.empty()) {  
+    while(!m_queue.empty()) {
         auto& obj = m_queue.top();
         obj->draw(*m_window, {});
         m_queue.pop();
@@ -103,6 +103,7 @@ void App::run()
 
         // Megjeleníteni kívánt elemek queue-ba helyezése, majd pedig render.
         for(auto& obj : m_scenes[m_activeSceneID]->getObjects()) {
+            if(!obj) continue; // Véletlenül se.
             m_renderer->pushQueue(obj);
         }
         m_renderer->render();

@@ -41,6 +41,7 @@ project "pingforce"
         pchheader "all.hpp"
 
         links {
+            "asan",
             "sfml-audio-s",
             "sfml-window-s",
             "sfml-graphics-s",
@@ -57,7 +58,7 @@ project "pingforce"
             "vorbis",
             "vorbisenc",
             "vorbisfile",
-            "ogg"
+            "ogg",
         }
 
         filter "configurations:Debug"
@@ -69,6 +70,10 @@ project "pingforce"
             buildoptions {
                 "-pedantic",
                 "-gdwarf-4"
+            }
+
+            sanitize {
+                "address"
             }
             
             flags {

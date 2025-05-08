@@ -38,14 +38,16 @@ public:
     /*! Priority queue miatt szükséges segédosztály. */
     struct Compare
     {
-        bool operator()(Object const& o1, Object const& o2) const
-        {
-            return o1.zIndex > o2.zIndex;
-        };
+        // bool operator()(Object const& o1, Object const& o2) const
+        // {
+        //     return o1.zIndex > o2.zIndex;
+        // };
 
         bool operator()(Object const* o1, Object const* o2) const
         {
-            return this->operator()(*o1, *o2);
+            if(!o1 || !o2) return false;
+            return o1->zIndex > o2->zIndex;
+            //return this->operator()(*o1, *o2);
         };
     };
 
