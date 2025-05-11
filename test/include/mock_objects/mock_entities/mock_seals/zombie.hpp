@@ -1,6 +1,6 @@
 #pragma once
 
-#include "objects/entities/seals/mock_seal_base.hpp"
+#include "mock_objects/mock_entities/mock_seals/seal_base.hpp"
 
 namespace pftd_test 
 {

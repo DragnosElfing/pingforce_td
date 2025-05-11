@@ -255,23 +255,27 @@ void GameScene::toggleActive(SceneStateFlag flag)
 
 void GameScene::startGame()
 {
-    //bool firstTime = !m_level;
-    if(m_level) {
-        // TODO: tényleg ideiglenes jó
-        objects.erase(std::remove(objects.begin(), objects.end(), m_level));
-        delete m_level;
-        m_level = nullptr;
-    }
-
-    if(m_shouldLoadSaved) {
-        m_level = new Level{GameScene::SAVE_FILE_PATH};
-        m_shouldLoadSaved = false;
+    // TODO: no
+    bool firstTime = !m_level;
+    if(!firstTime) {
+        if(m_shouldLoadSaved) {
+            m_level->reset();
+            m_shouldLoadSaved = false;
+        } else {
+            Level::Stats defStats {3, 3, 0, 250};
+            m_level->reset(defStats);
+        }
     } else {
-        Level::Stats defStats {3, 3, 0, 250};
-        m_level = new Level{GameScene::SAVE_FILE_PATH, defStats};
+        if(m_shouldLoadSaved) {
+            m_level = new Level{GameScene::SAVE_FILE_PATH};
+            m_shouldLoadSaved = false;
+        } else {
+            Level::Stats defStats {3, 3, 0, 250};
+            m_level = new Level{GameScene::SAVE_FILE_PATH, defStats};
+        }
     }
 
-    if(true) {
+    if(firstTime) {
         objects.push_back(m_level);
     }
 

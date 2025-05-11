@@ -2,10 +2,10 @@
 
 #include "all.hpp"
 
-#include "objects/mock_clickable.hpp"
-#include "objects/gui/mock_image.hpp"
-#include "objects/gui/mock_label.hpp"
-#include "objects/mock_object_base.hpp"
+#include "mock_objects/clickable.hpp"
+#include "mock_objects/mock_gui/image.hpp"
+#include "mock_objects/mock_gui/label.hpp"
+#include "mock_objects/object_base.hpp"
 
 namespace pftd_test 
 {

@@ -2,8 +2,8 @@
 
 #include "all.hpp"
 
-#include "objects/gui/mock_image.hpp"
-#include "objects/mock_object_base.hpp"
+#include "mock_objects/mock_gui/image.hpp"
+#include "mock_objects/object_base.hpp"
 #include "utils/serializable.hpp"
 
 namespace pftd_test

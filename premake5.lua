@@ -75,11 +75,11 @@ project "pingforce"
             sanitize {
                 "address"
             }
-            
+
             flags {
                 "FatalWarnings"
             }
-            
+
             warnings "Extra" -- -Wall -Wextra
             externalwarnings "Off"
 
@@ -90,10 +90,10 @@ project "pingforce"
                 "gnu-anonymous-struct",
                 "nested-anon-types"
             }
-            
+
         filter "configurations:Release"
             optimize "On"
-            
+
             warnings "Off"
             externalwarnings "Off"
 
@@ -111,18 +111,26 @@ project "pingforce_test"
         "test/include"
     }
 
+    links {
+        "asan"
+    }
+
     externalincludedirs {
         "include",
-        "." -- memtrace.h és gtest_lite.h miatt, amit a JPorta szúr be
+        --"." -- memtrace.h és gtest_lite.h miatt, amit a JPorta szúr be
+    }
+
+    sanitize {
+        "address"
     }
 
     defines {
         "_PFTD_TEST"
     }
 
-    postbuildcommands {
-        "valgrind --tool=memcheck --track-origins=yes --leak-check=full %{cfg.buildtarget.name} &> %{prj.location}/%{leak_file}"
-    }
+    -- postbuildcommands {
+    --     "valgrind --tool=memcheck --track-origins=yes --leak-check=full %{cfg.buildtarget.name} &> %{prj.location}/%{leak_file}"
+    -- }
 
     filter {"system:linux", "action:gmake"}
         symbols "On"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "objects/entities/projectiles/mock_projectile_base.hpp"
+#include "mock_objects/mock_entities/mock_projectiles/projectile_base.hpp"
 
 namespace pftd_test 
 {

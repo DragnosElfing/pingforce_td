@@ -1,7 +1,7 @@
 #pragma once
 
-#include "objects/gui/mock_button.hpp"
-#include "mock_scene.hpp"
+#include "mock_objects/mock_gui/button.hpp"
+#include "mock/scene.hpp"
 
 namespace pftd_test
 {
@@ -18,7 +18,7 @@ public:
 
 //private:
     std::vector<gr::Button*> m_buttons;
-    
+
 };
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "all.hpp"
-#include "objects/mock_object_base.hpp"
+#include "mock_objects/object_base.hpp"
 
 namespace pftd_test 
 {

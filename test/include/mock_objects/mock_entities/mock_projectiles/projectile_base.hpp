@@ -1,6 +1,6 @@
 #pragma once
 
-#include "objects/entities/mock_entity_base.hpp"
+#include "mock_objects/mock_entities/entity_base.hpp"
 #include "utils/substitute_types.hpp"
 
 namespace pftd_test

@@ -1,9 +1,9 @@
 
 #include "all.hpp"
 
-#include "objects/entities/projectiles/mock_projectile_base.hpp"
-#include "objects/entities/seals/mock_seal_base.hpp"
-#include "objects/entities/towers/mock_tower_base.hpp"
+#include "mock_objects/mock_entities/mock_projectiles/projectile_base.hpp"
+#include "mock_objects/mock_entities/mock_seals/seal_base.hpp"
+#include "mock_objects/mock_entities/mock_towers/tower_base.hpp"
 #include "utils/serializable.hpp"
 #include "utils/parsers.hpp"
 

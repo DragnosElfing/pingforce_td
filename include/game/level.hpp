@@ -113,6 +113,9 @@ public:
 
     void save() const;
 
+    void reset(Stats stats);
+    void reset();
+
     /**
     * @brief Objektum megjelenítése.
     *

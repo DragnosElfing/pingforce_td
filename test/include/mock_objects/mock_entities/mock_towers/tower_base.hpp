@@ -1,8 +1,8 @@
 #pragma once
 
-#include "objects/entities/mock_entity_base.hpp"
-#include "objects/entities/projectiles/mock_projectile_base.hpp"
-#include "objects/entities/seals/mock_seal_base.hpp"
+#include "mock_objects/mock_entities/entity_base.hpp"
+#include "mock_objects/mock_entities/mock_projectiles/projectile_base.hpp"
+#include "mock_objects/mock_entities/mock_seals/seal_base.hpp"
 
 namespace pftd_test 
 {

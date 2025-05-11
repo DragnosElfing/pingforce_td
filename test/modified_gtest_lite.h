@@ -9,7 +9,7 @@
  * Sz.I. 2018 (template), ENDM, ENDMsg, nullptr_t
  * Sz.I. 2019 singleton
  * Sz.I. 2021 ASSERT.., STRCASE...
- * Sz.I. 2021 EXPEXT_REGEXP, CREATE_Has_fn_, cmp w. NULL, EXPECT_ param fix 
+ * Sz.I. 2021 EXPEXT_REGEXP, CREATE_Has_fn_, cmp w. NULL, EXPECT_ param fix
  *
  * A tesztelés legalapvetőbb funkcióit támogató függvények és makrók.
  * Nem szálbiztos megvalósítás.
@@ -52,9 +52,7 @@
 # include <iterator>
 # include <regex>
 #endif
-#ifdef MEMTRACE
-# include "memtrace.h"
-#endif
+// memtrace törölve
 
 // Két makró az egyes tesztek elé és mögé:
 // A két makró a kapcsos zárójelekkel egy új blokkot hoz létre, amiben
@@ -72,12 +70,12 @@
 
 /// Teszteset vége allokált blokkok számának összehasonlításával
 /// Ez az ellenőrzés nem bomba biztos.
-#define ENDM gtest_lite::test.end(true); } while (false);
+#define ENDM gtest_lite::test.end(); } while (false);
 
 /// Teszteset vége allokált blokkok számának összehasonlításával
 /// Ez az ellenőrzés nem bomba biztos.
 /// Ha hiba van kiírja az üzenetet.
-#define ENDMsg(t) gtest_lite::test.end(true) << t << std::endl; } while (false);
+#define ENDMsg(t) gtest_lite::test.end() << t << std::endl; } while (false);
 
 // Eredmények vizsgálatát segítő makrók.
 // A paraméterek és a funkciók a gtest keretrendszerrel megegyeznek.
@@ -277,20 +275,11 @@ public:
     /// Teszt kezdete
     void begin(const char *n) {
         name = n; status = true;
-#ifdef MEMTRACE
-        ablocks = memtrace::allocated_blocks();
-#endif
         os << "\n---> " << name << std::endl;
         ++sum;
     }
     /// Teszt vége
-    std::ostream& end(bool memchk = false) {
-#ifdef MEMTRACE
-        if (memchk && ablocks != memtrace::allocated_blocks()) {
-            status = false;
-            return os << "** Lehet, hogy nem szabaditott fel minden memoriat! **" << std::endl;
-        }
-#endif
+    std::ostream& end() {
         os << (status ? "     SIKERES" : "** HIBAS ****") << "\t" << name << " <---" << std::endl;
 #ifdef CPORTA
         if (!status)

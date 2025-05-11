@@ -175,6 +175,34 @@ Level::~Level()
     }
 }
 
+void Level::reset(Stats stats)
+{
+    // TODO: MAX_HP should not be a const
+    this->stats.hp = stats.hp;
+    this->loseHP(stats.MAX_HP - stats.hp);
+    this->stats.money = stats.money;
+    this->stats.score = stats.score;
+
+    this->deselectTower();
+    for(auto& tower : towers) {
+        delete tower;
+    }
+    towers.clear();
+    for(auto& seal : seals) {
+        delete seal;
+    }
+    seals.clear();
+    for(auto& proj : projectiles) {
+        delete proj;
+    }
+    projectiles.clear();
+}
+
+void Level::reset()
+{
+
+}
+
 void Level::loseHP(int hpLost)
 {
     if(hpLost >= stats.hp) {
@@ -223,7 +251,7 @@ void Level::deselectTower()
 void Level::selectTower(Tower* newTower)
 {
     this->deselectTower();
-    selectedTower = newTower->clone();
+    selectedTower = newTower;
 }
 
 void Level::spawnSeal()

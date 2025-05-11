@@ -1,7 +1,7 @@
 #pragma once
 
-#include "objects/entities/mock_entity_base.hpp"
-#include "objects/entities/seals/mock_followpath.hpp"
+#include "mock_objects/mock_entities/entity_base.hpp"
+#include "mock_objects/mock_entities/mock_seals/followpath.hpp"
 #include "utils/substitute_types.hpp"
 
 namespace pftd_test

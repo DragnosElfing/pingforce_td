@@ -1,6 +1,6 @@
 #pragma once
 
-#include "objects/entities/towers/mock_tower_base.hpp"
+#include "mock_objects/mock_entities/mock_towers/tower_base.hpp"
 
 namespace pftd_test 
 {
