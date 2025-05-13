@@ -1,5 +1,6 @@
+#ifndef CPORTA
+
 #include "SFML/Window/Keyboard.hpp"
-#include "SFML/Window/Mouse.hpp"
 #include "objects/entities/towers/iciclestabber.hpp"
 #include "objects/entities/towers/snowballer.hpp"
 #include "objects/gui/image.hpp"
@@ -8,7 +9,6 @@
 #include "scene.hpp"
 #include "scenes/menu.hpp"
 #include "scenes/game.hpp"
-#include "utils/logger.hpp"
 #include "app.hpp"
 
 #define WIN_WIDTH static_cast<float>(App::getInstance()->getWindowWidth())
@@ -20,24 +20,24 @@ using namespace pftd;
 MenuScene::MenuScene()
 {
     // Logó
-    objects.push_back(new gr::Sprite{"res/images/logo.png", {50, App::getInstance()->getWindowHeight()/2.f - 360}, {620, 620}});
-    
+    objects.push_back(new gr::Sprite{"res/images/logo.png", {50, WIN_HEIGHT/2.f - 360}, {620, 620}});
+
     // Háttérkép
-    auto background = new gr::Sprite{"res/images/menu_bg.jpeg", {0, 0}, 
+    auto background = new gr::Sprite{"res/images/menu_bg.jpeg", {0, 0},
         {WIN_WIDTH, WIN_HEIGHT}, -100};
     background->modColor({230, 230, 255, 180});
     objects.push_back(background);
 
     // Le a kalappal!
     objects.push_back(new gr::Label{
-        sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"A felhasznált illusztrációkat Illés Dóra készítette.", 16}, 
+        L"A felhasznált illusztrációkat Illés Dóra készítette.", ResourceManager::getInstance()->getDefaultFont(), 16,
         {10, WIN_HEIGHT - 20}
     });
 
     /* Gombok */
     // Új játék
-    auto newGameButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Új játék", 34},
-        {WIN_WIDTH - 400.0f, WIN_HEIGHT/2.f - 60}, 
+    auto newGameButt = new gr::Button{{L"Új játék", ResourceManager::getInstance()->getDefaultFont(), 34},
+        {WIN_WIDTH - 400.0f, WIN_HEIGHT/2.f - 60},
             {330, 110}};
     newGameButt->setBackground("./res/images/button_bg.png");
     newGameButt->setCallback([&self = newGameButt](){
@@ -46,17 +46,13 @@ MenuScene::MenuScene()
     m_buttons.push_back(newGameButt);
 
     // Mentett betöltése
-    // Ellenőrzi, hogy létezik e a save fájl, és, hogy meg lehet e nyitni.
-    std::ifstream saveFile {GameScene::SAVE_FILE_PATH};
-    bool loadButtonActive = saveFile.good();
-    saveFile.close();
 
-    auto loadGameButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Mentett betöltése", 34}, 
-        {WIN_WIDTH - 400.0f, WIN_HEIGHT/2.f + 60}, 
-            {330, 110}, loadButtonActive};
+    auto loadGameButt = new gr::Button{{L"Mentett betöltése", ResourceManager::getInstance()->getDefaultFont(), 34},
+        {WIN_WIDTH - 400.0f, WIN_HEIGHT/2.f + 60},
+            {330, 110}, this->_isSaveFileAvailable()};
     loadGameButt->setBackground("./res/images/button_bg.png");
-    loadGameButt->setCallback([&self = loadGameButt](){ 
-        App::getInstance()->changeScene("game", SceneStateFlag::LOAD_STATE);
+    loadGameButt->setCallback([&self = loadGameButt](){
+        App::getInstance()->changeScene("game", Scene::StateFlag::LOAD_STATE);
     });
     m_buttons.push_back(loadGameButt);
 
@@ -68,13 +64,8 @@ MenuScene::MenuScene()
     this->setMusic("res/audio/menu_theme.mp3", 70);
 }
 
-MenuScene::~MenuScene()
-{
-
-}
-
 void MenuScene::onEvent(sf::Event const& ev)
-{   
+{
     auto clickEvent = ev.getIf<sf::Event::MouseButtonPressed>();
     if(clickEvent) {
         auto const clickPos = utils::Vec2i{clickEvent->position.x, clickEvent->position.y};
@@ -89,15 +80,23 @@ void MenuScene::update(float)
 
 }
 
-void MenuScene::toggleActive(SceneStateFlag)
+bool MenuScene::_isSaveFileAvailable()
 {
-    if(!isActive) {
-        std::ifstream saveFile {GameScene::SAVE_FILE_PATH};
-        m_buttons[1]->isActive = saveFile.good();
-        saveFile.close();
+    std::ifstream saveFile {GameScene::SAVE_FILE_PATH};
+    bool isAvailable = saveFile.good();
+    saveFile.close();
+
+    return isAvailable;
+}
+
+void MenuScene::toggleActive(Scene::StateFlag)
+{
+    Scene::toggleActive();
+
+    if(isActive) {
+        m_buttons.at(1)->isActive = this->_isSaveFileAvailable();
     }
 
-    Scene::toggleActive();
 }
 ///
 
@@ -108,13 +107,13 @@ GameScene::InventoryItem::InventoryItem(Tower* tower, Level * const level, utils
     frame{"res/images/inventory_frame.png", position, size},
     icon{tower->getSpriteSheet(), {{0, 0}, {1024, 1024}}, position, size, 100},
     towerToSpawn{tower},
-    priceLabel{{ResourceManager::getInstance()->getDefaultFont(), "$" + std::to_string(towerToSpawn->price), 21}, 
+    priceLabel{L"$" + std::to_wstring(towerToSpawn->properties.price), ResourceManager::getInstance()->getDefaultFont(), 21,
         {}, 100, sf::Color::Green}
 {
     // Közép-lentre igazítás
     priceLabel.getText().setOrigin(priceLabel.getText().getGlobalBounds().size / 2.0f + priceLabel.getText().getLocalBounds().position);
     priceLabel.getText().setPosition({position.x + size.x / 2.0f, position.y + size.y});
-    
+
     priceLabel.setOutline(sf::Color::White, 2.5f);
 
     this->setCallback([this, level](){
@@ -139,9 +138,9 @@ void GameScene::InventoryItem::draw(sf::RenderTarget& target, sf::RenderStates s
 /// Inventory
 GameScene::Inventory::Inventory(std::string const& backgroundImageSrc):
     background{
-        ResourceManager::getInstance()->getTexture(backgroundImageSrc), 
-        {static_cast<float>(App::getInstance()->getWindowWidth() - 200), 0}, 
-        {200, static_cast<float>(App::getInstance()->getWindowHeight())}, 1
+        ResourceManager::getInstance()->getTexture(backgroundImageSrc),
+        {WIN_WIDTH - 200, 0},
+        {200, WIN_HEIGHT}, 1
     }
 {
 
@@ -161,9 +160,9 @@ GameScene::GameScene()
 {
     // Háttér
     objects.push_back(new gr::Sprite{"res/images/map.png", {0, 0}, {WIN_WIDTH - 180, WIN_HEIGHT}, -100});
-    
+
     // Mentés & kilépés gomb
-    m_saveButt = new gr::Button{sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Mentés & Kilépés", 18}, 
+    m_saveButt = new gr::Button{{L"Mentés & Kilépés", ResourceManager::getInstance()->getDefaultFont(), 18},
         {10,10},{180, 60}, true, 100};
     m_saveButt->setBackground("./res/images/button_bg.png");
     m_saveButt->setCallback([&self = m_saveButt, this](){
@@ -175,10 +174,10 @@ GameScene::GameScene()
 
     // Pénz & pont mutatók
     m_moneyCounter = new gr::Label{
-        sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"$0", 24}, 
+        L"$0", ResourceManager::getInstance()->getDefaultFont(), 24,
         {200, 40}, 100, sf::Color::Green};
     m_scoreCounter = new gr::Label{
-        sf::Text{ResourceManager::getInstance()->getDefaultFont(), L"Pont: 0", 24}, 
+        L"Pont: 0", ResourceManager::getInstance()->getDefaultFont(), 24,
         {200, 10}, 100, sf::Color::Cyan};
     objects.push_back(m_moneyCounter);
     objects.push_back(m_scoreCounter);
@@ -186,7 +185,7 @@ GameScene::GameScene()
     /* Inventory */
     m_inventory = new Inventory{"res/images/inventory.png"};
     objects.push_back(m_inventory);
-    
+
     // Zene
     this->setMusic("res/audio/defend.mp3", 90);
 }
@@ -206,7 +205,7 @@ void GameScene::onEvent(sf::Event const& ev)
             item->handleClick(clickPos);
         }
 
-        bool inBounds = clickEvent->position.x < App::getInstance()->getWindowWidth() - 200;
+        bool inBounds = clickEvent->position.x < WIN_WIDTH - 200;
         if(inBounds) {
             m_level->placeTower();
         }
@@ -239,27 +238,42 @@ void GameScene::update(float dt)
     m_level->update(dt);
 }
 
-void GameScene::toggleActive(SceneStateFlag flag)
+void GameScene::toggleActive(Scene::StateFlag flag)
 {
-    if(!isActive) {
-        // TODO: no
-        if((static_cast<uint8_t>(flag) & static_cast<uint8_t>(SceneStateFlag::LOAD_STATE)) == static_cast<uint8_t>(SceneStateFlag::LOAD_STATE)) {
+    Scene::toggleActive(flag);
+
+    if(isActive) {
+        // Megoldható lenne egyedi operator&-ral.
+        if((static_cast<uint8_t>(flag) & static_cast<uint8_t>(Scene::StateFlag::LOAD_STATE)) == static_cast<uint8_t>(Scene::StateFlag::LOAD_STATE)) {
             m_shouldLoadSaved = true;
-            where();
         }
         this->startGame();
     }
 
-    Scene::toggleActive(flag);
+}
+
+void GameScene::_constructInventory()
+{
+    // Inventory feltöltése
+    // Snowballer
+    auto snowballerTower = new InventoryItem{new Snowballer{}, m_level, {WIN_WIDTH - 180, 10}, {170, 170}};
+    m_inventory->append(snowballerTower);
+
+    // IcicleStabber
+    auto icicleTower = new InventoryItem{new IcicleStabber{}, m_level, {WIN_WIDTH - 180, 180+10+10}, {170, 170}};
+    m_inventory->append(icicleTower);
+
+    m_hornSound.play();
+    m_hornSound.setVolume(100);
 }
 
 void GameScene::startGame()
 {
-    // TODO: no
+    // Egy ObjectPool ezt a problémát megoldaná, de már nem lesz tovább komplikálva.
+    // Így kissé "gagyin" néz ki, de helyesen működik.
     bool firstTime = !m_level;
     if(!firstTime) {
         if(m_shouldLoadSaved) {
-            m_level->reset();
             m_shouldLoadSaved = false;
         } else {
             Level::Stats defStats {3, 3, 0, 250};
@@ -279,18 +293,7 @@ void GameScene::startGame()
         objects.push_back(m_level);
     }
 
-    // Inventory feltöltése
-    // TODO: m_inventory should calculate the positions of its items and also define their size
-    // Snowballer
-    auto snowballerTower = new InventoryItem{new Snowballer{}, m_level, {WIN_WIDTH - 180, 10}, {170, 170}};
-    m_inventory->append(snowballerTower);
-    
-    // IcicleStabber
-    auto icicleTower = new InventoryItem{new IcicleStabber{}, m_level, {WIN_WIDTH - 180, 180+10+10}, {170, 170}};
-    m_inventory->append(icicleTower);
-
-    m_hornSound.play();
-    m_hornSound.setVolume(100);
+    this->_constructInventory();
 }
 
 void GameScene::updateScore()
@@ -304,3 +307,5 @@ void GameScene::updateWealth()
 }
 
 ///
+
+#endif

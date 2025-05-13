@@ -1,14 +1,7 @@
+#ifndef CPORTA
+
 #include "game/level.hpp"
-// TODO: put these inside a single header file
-#include "objects/entities/entity_base.hpp"
-#include "objects/entities/projectiles/projectile_base.hpp"
-#include "objects/entities/projectiles/snowball.hpp"
-#include "objects/entities/seals/cub.hpp"
-#include "objects/entities/seals/fortified_zombie_cub.hpp"
-#include "objects/entities/seals/regular.hpp"
-#include "objects/entities/seals/zombie.hpp"
-#include "objects/entities/towers/iciclestabber.hpp"
-#include "objects/entities/towers/snowballer.hpp"
+#include "objects/entities/all_entities.hpp"
 #include "utils/parsers.hpp"
 #include "utils/random_gen.hpp"
 #include "app.hpp"
@@ -20,46 +13,29 @@ using Nest = Level::Nest;
 using FP = FollowPath;
 
 /// Stats
-Stats::Stats()
-{
-
-}
-
 Stats::Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth):
-    MAX_HP{maxHp}, hp{currentHp}, score{score}, money{wealth}
+    maxHp{maxHp}, hp{currentHp}, score{score}, money{wealth}
 {
 
 }
 
 void Stats::serialize(std::ostream& out) const
 {
-    out << score << " " << money << " " << hp;
+    out << score << ' ' << money << ' ' << maxHp << ' ' << hp;
 }
 ///
 
 /// Nest
 Nest::Nest(utils::Vec2f const& position):
-    Entity{ResourceManager::getInstance()->getTexture("res/images/eggs.png"), 
+    Entity{ResourceManager::getInstance()->getTexture("res/images/eggs.png"),
         {1024, 1024}, position, {2.0f*110, 2.0f*110}, 1}
 {
 
 }
 
-Nest::~Nest()
-{
-    
-}
-
 Nest* Nest::clone() const
 {
     return new Nest{position};
-}
-///
-
-/// FollowPath
-FP::FollowPath()
-{
-
 }
 ///
 
@@ -87,14 +63,14 @@ Level::Level(std::string const& saveFile):
     config{"res/data/level.conf"},
     saveFile{saveFile}
 {
-    // Először a konfig.
+    // Először a konfig ...
     config.parse();
     nest = new Nest{config.getAttribute("nestPosition")[0]};
     for(auto& [x, y] : config.getAttribute("followPath")) {
         followPath.append(new utils::Vec2{x, y});
     }
 
-    // Utánna a mentett állás.
+    // ... Utánna a mentett állás.
     utils::parser::SaveFileParser saveFileP {saveFile};
     try {
         saveFileP.parse();
@@ -103,10 +79,8 @@ Level::Level(std::string const& saveFile):
     }
 
     auto sInf = saveFileP.getStats();
-    stats.hp = stats.MAX_HP;
-    this->loseHP(stats.hp - sInf.hp);
-    stats.money = sInf.wealth;
-    stats.score = sInf.score;
+    stats = Stats{sInf.maxHp, sInf.maxHp, sInf.score, sInf.wealth};
+    this->loseHP(stats.maxHp - sInf.hp);
 
     for(auto const& eInf : saveFileP.getEntities()) {
         switch(eInf.entityType) {
@@ -118,7 +92,7 @@ Level::Level(std::string const& saveFile):
             case static_cast<int>(TowerID::ICICLE_STABBER):
                 towers.push_back(new IcicleStabber{eInf.position});
                 break;
-            default: break; 
+            default: break;
             }
 
             towers.back()->setProjSpawnCb([this](Projectile* projectile){
@@ -151,7 +125,7 @@ Level::Level(std::string const& saveFile):
             case static_cast<int>(ProjectileID::SNOWBALL):
                 projectiles.push_back(new Snowball{eInf.position, eInf.proj.direction, eInf.proj.speed});
                 break;
-            default: break; 
+            default: break;
             }
 
             break;
@@ -177,13 +151,14 @@ Level::~Level()
 
 void Level::reset(Stats stats)
 {
-    // TODO: MAX_HP should not be a const
-    this->stats.hp = stats.hp;
-    this->loseHP(stats.MAX_HP - stats.hp);
-    this->stats.money = stats.money;
-    this->stats.score = stats.score;
+    this->stats = stats;
+    // HP vesztés shenanigans.
+    this->stats.hp = stats.maxHp;
+    this->loseHP(stats.maxHp - stats.hp);
 
     this->deselectTower();
+
+    // Kvázi destruktor.
     for(auto& tower : towers) {
         delete tower;
     }
@@ -198,11 +173,6 @@ void Level::reset(Stats stats)
     projectiles.clear();
 }
 
-void Level::reset()
-{
-
-}
-
 void Level::loseHP(int hpLost)
 {
     if(hpLost >= stats.hp) {
@@ -211,7 +181,7 @@ void Level::loseHP(int hpLost)
         stats.hp -= hpLost;
     }
 
-    nest->getSprite()->setSpriteRect({{(stats.MAX_HP - stats.hp)*1024, 0}, {1024, 1024}});
+    nest->getSprite()->setSpriteRect({{(stats.maxHp - stats.hp)*1024, 0}, {1024, 1024}});
 }
 
 bool Level::placeTower()
@@ -219,20 +189,22 @@ bool Level::placeTower()
     if(!selectedTower) return false;
 
     for(auto& tower : towers) {
-        if(utils::Vec2f::distance(tower->getPosition(), selectedTower->getPosition()) 
-            <= std::max(tower->radiusPixel, selectedTower->radiusPixel)) {
+        // Ha pályán kívülre szeretnénk: ne.
+        if(utils::Vec2f::distance(tower->getPosition(), selectedTower->getPosition())
+            <= std::max(tower->properties.radiusPixel, selectedTower->properties.radiusPixel)) {
             return false;
         }
     }
 
-    if(stats.money >= selectedTower->price) {
-        stats.money -= selectedTower->price;
+    // Ha van elég pénzünk, akkor leteszi.
+    if(stats.money >= selectedTower->properties.price) {
+        stats.money -= selectedTower->properties.price;
         towers.push_back(selectedTower->clone());
         towers.back()->setProjSpawnCb([this](Projectile* projectile){
             projectiles.push_back(std::move(projectile));
         });
         this->deselectTower();
-        
+
         return true;
     } else {
         return false;
@@ -273,37 +245,65 @@ void Level::spawnSeal()
     seals.push_back(newSeal);
 }
 
-void Level::update(float dt)
+void Level::_spawnSeal(float dt)
 {
-    
-    // Non-linear hozzáférés az elemekhez
+    if(m_accuTimeSpawnSec >= 1.0f) {
+        if(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) <= 0.9f) {
+            this->spawnSeal();
+        }
+
+        m_accuTimeSpawnSec = 0.0f;
+    }
+
+    m_accuTimeSpawnSec += dt;
+}
+
+void Level::_updateTowers(float dt)
+{
+    for(auto tower : towers) {
+        tower->update(dt);
+        tower->lookForTarget(seals);
+    }
+}
+
+void Level::_updateSeals(float dt)
+{
     for(auto it = seals.begin(); it != seals.end();) {
         auto& seal = *it;
-        
+
+        // Meghalt vagy befejezte az útját (igen, akkor is jár pont).
         if(seal->hp <= 0 || seal->hasCompletedPath()) {
             stats.money += seal->value;
             stats.score += seal->value * 3;
+
             delete seal;
             seal = nullptr;
             it = seals.erase(it);
         } else {
+            // Tojáslopás.
             if(seal->isCurrentlyStealing) {
                 this->loseHP();
                 seal->isCurrentlyStealing = false;
             }
+
             seal->update(dt);
+
             it = std::next(it);
         }
     }
+}
 
+void Level::_updateProjectiles(float dt)
+{
     for(auto it = projectiles.begin(); it != projectiles.end();) {
         auto& proj = *it;
 
         bool deletion = false;
         for(auto& seal : seals) {
+            // Eltalált egy fókát.
             if(utils::Vec2f::distance(proj->getPosition(), seal->getPosition()) < 100) {
                 seal->damage();
-                
+
                 delete proj;
                 it = projectiles.erase(it);
                 deletion = true;
@@ -313,6 +313,7 @@ void Level::update(float dt)
 
         if(!deletion) {
             auto projPos = sf::Vector2i{static_cast<int>(proj->getPosition().x), static_cast<int>(proj->getPosition().y)};
+            // Kijött a képernyőből.
             if(!sf::IntRect{{0, 0}, {App::getInstance()->getWindowWidth(), App::getInstance()->getWindowHeight()}}
                 .contains(projPos)) {
                     delete proj;
@@ -325,49 +326,35 @@ void Level::update(float dt)
             it = std::next(it);
         }
     }
-    
-    for(auto tower : towers) {
-        tower->update(dt);
-        tower->lookForTarget(seals);
-    }
 
     for(auto& proj : projectiles) {
         proj->update(dt);
     }
-
-    if(m_accuTimeSpawnSec >= 1.0f) {
-        if(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) <= 0.9f) {
-            this->spawnSeal();
-        }
-
-        m_accuTimeSpawnSec = 0.0f;
-    }
-
-    m_accuTimeSpawnSec += dt;
 }
 
-bool Level::isGameOver() const 
+void Level::update(float dt)
 {
-    return stats.hp <= 0;
+    this->_updateProjectiles(dt);
+    this->_spawnSeal(dt);
+    this->_updateSeals(dt);
+    this->_updateTowers(dt);
 }
 
 void Level::save() const
 {
     std::ofstream save_f {saveFile};
     if(!save_f.is_open()) {
-        throw std::runtime_error{"Nem lehetett megnyitni a mentés fájlt!"};
+        throw LoadError{"Nem lehetett megnyitni a mentés fájlt!"};
     }
 
     save_f << "pingforce\n";
-    save_f << "\n# stats\n";
+    save_f << "\n# stats\n# Formátum: <pont> <pénz> <max. HP> <HP>\n";
     stats.serialize(save_f);
 
-    save_f << "\n# entities\n";
+    save_f << "\n# entities\n# Formátum: <típus: \"seal\" | \"penguin\" | \"projectile\"> <ID: int> <pozíció: Vec2f> [ entitás típustól függő adatok... ]\n";
     for(auto const& tower : towers) {
         if(tower) {
             tower->serialize(save_f);
-        } else {
-            print("nullptr");
         }
     }
     for(auto const& seal : seals) {
@@ -397,3 +384,5 @@ void Level::draw(sf::RenderTarget& target, sf::RenderStates states) const
 }
 
 ///
+
+#endif

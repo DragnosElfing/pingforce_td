@@ -1,6 +1,8 @@
 #ifndef GTEST_LITE_H
 #define GTEST_LITE_H
 
+//! A MEMTRACE KI LETT VÉVE - Heltai Kilián
+
 /**
  * \file gtest_lite.h  (v3/2019)
  *

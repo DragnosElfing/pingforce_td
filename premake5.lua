@@ -128,10 +128,6 @@ project "pingforce_test"
         "_PFTD_TEST"
     }
 
-    -- postbuildcommands {
-    --     "valgrind --tool=memcheck --track-origins=yes --leak-check=full %{cfg.buildtarget.name} &> %{prj.location}/%{leak_file}"
-    -- }
-
     filter {"system:linux", "action:gmake"}
         symbols "On"
         optimize "Off"

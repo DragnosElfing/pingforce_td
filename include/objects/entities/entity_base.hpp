@@ -1,13 +1,13 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "all.hpp"
 
 #include "objects/gui/image.hpp"
 #include "objects/object_base.hpp"
-#include "utils/serializable.hpp"
 
-namespace pftd 
-{
+namespace pftd {
 
 /*! Mindenféle "actor" ősosztálya: tornyok, fólák és lövedékek. */
 class Entity : public Object
@@ -36,18 +36,12 @@ public:
     */
     virtual void update(float dt);
 
-    /**
-    * @brief Objektum megjelenítése.
-    *
-    * @param target Hol legyen megjelenítve? Ez általában egy ablak.
-    * @param states Render-eléshez szükséges egyéb állapotok.
-    */
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
     /**
     * @brief Pozíció beállítása.
     *
-    * @param position Az új pozíció. 
+    * @param position Az új pozíció.
     */
     void setPosition(utils::Vec2f position);
 
@@ -57,7 +51,7 @@ public:
     * @return Az entitás jelenlegi pozíciója.
     */
     auto getPosition() const { return position; }
-    
+
     /**
     * @brief Konstans `currentSprite` getter.
     *
@@ -82,7 +76,7 @@ public:
 protected:
     /*! A sprite sheet. */
     sf::Texture const& spriteSheet; // Feltételezzük, hogy egy sorban vannak a sprite-ok
-    
+
     /*! Képkockák mérete (fix). */
     utils::Vec2i cellSize;
 
@@ -102,12 +96,17 @@ protected:
     float totalElapsedSec = 0.0f; // Animációhoz van használva elsősorban.
 
     /**
-    * @brief Animáció: képkocka léptetése. 
+    * @brief Animáció: képkocka léptetése.
     */
     virtual void advanceAnimationFrame();
 
+    /**
+    * @brief Visszaállítja a jelenlegi képkockát az elsőre, és nullázza az időt.
+    */
     virtual void resetAnimation();
 
 };
 
 }
+
+#endif

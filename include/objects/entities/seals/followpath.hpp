@@ -12,7 +12,7 @@ struct FollowPath : public utils::Container<EndPoint>
     /**
     * @brief A `Level` - amihez tartozik - "építi fel."
     */
-    FollowPath();
+    FollowPath() = default;
 };
 
 }

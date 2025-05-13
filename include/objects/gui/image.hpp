@@ -1,13 +1,13 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "all.hpp"
 
 #include "objects/object_base.hpp"
 
-namespace pftd 
-{
-namespace gr 
-{
+namespace pftd {
+namespace gr {
 
 /*! Saját sprite osztály. Használható kép GUI elemként. */
 class Sprite final : public Object
@@ -16,10 +16,10 @@ public:
     Sprite(sf::Texture const& texture, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = -1);
     Sprite(sf::Texture const& texture, sf::IntRect const& textureRect, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = -1);
     Sprite(std::string const& imageSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = -1);
-    
+
     Sprite(Sprite const& other);
     Sprite(Sprite&& other) noexcept;
-    
+
     ~Sprite() = default;
 
     /**
@@ -52,14 +52,13 @@ public:
     */
     void setSpriteRect(sf::IntRect const& textureRect);
 
+    /**
+    * @brief Beállítja az `m_sprite` pozícióját.
+    *
+    * @param newPos Az új pozíció.
+    */
     void setPosition(utils::Vec2f const& newPos) { m_sprite.setPosition({newPos.x, newPos.y}); }
 
-    /**
-    * @brief Objektum megjelenítése.
-    *
-    * @param target Hol legyen megjelenítve? Ez általában egy ablak.
-    * @param states Render-eléshez szükséges egyéb állapotok.
-    */
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:
@@ -73,3 +72,5 @@ private:
 
 }
 }
+
+#endif

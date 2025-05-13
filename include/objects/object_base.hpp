@@ -1,16 +1,17 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "all.hpp"
 
-namespace pftd
-{
+namespace pftd {
 
 /*! Programelemek. */
 class Object : public sf::Drawable
 {
 public:
     Object() = default;
-    
+
     /**
     * @brief
     *
@@ -24,7 +25,7 @@ public:
 
     Object(Object const&) = default;
     Object(Object&&) noexcept = default;
-    
+
     virtual ~Object() = default;
 
     /**
@@ -64,3 +65,5 @@ protected:
 };
 
 }
+
+#endif

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "objects/object_base.hpp"
 #include "scene.hpp"
 
@@ -21,7 +23,7 @@ public:
 
     Renderer(Renderer const&) = delete;
     Renderer(Renderer&&) = delete;
-    
+
     /**
     * @brief Felszabadítja az ablak erőforrásait.
     */
@@ -59,7 +61,7 @@ public:
 private:
     /*! A kezelt ablak. */
     sf::RenderWindow* m_window = nullptr;
-    
+
     /*! Az ablak szélessége. */
     unsigned int m_width;
 
@@ -109,9 +111,10 @@ public:
     * Megjegyzés: Ha már létezik ilyen nézet a megadott azonosítóval, akkor `SceneError`-t dob.
     *
     * @param id Az új nézet azonosítója.
+    * @param flag Egyéb "kérést" közlő opció flag.
     * @return Sikerült e váltani.
     */
-    bool changeScene(std::string id, SceneStateFlag flag = SceneStateFlag::NONE);
+    bool changeScene(std::string id, Scene::StateFlag flag = Scene::StateFlag::NONE);
 
     /**
     * @brief `m_running` getter.
@@ -135,14 +138,14 @@ public:
     int getWindowHeight() const { return this->m_renderer->m_height; }
 
     App& operator=(App const&) = delete;
-    
+
     /**
     * @brief A singleton instance megszerzése.
     *
     * @return Az osztályhoz tartozó singleton instance.
     */
     static App* getInstance() { return m_instance; }
-    
+
     /**
     * @brief Inicializálja a különböző programelemeket.
     *
@@ -188,3 +191,5 @@ struct SceneError : public std::runtime_error
 };
 
 }
+
+#endif

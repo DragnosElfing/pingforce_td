@@ -1,12 +1,10 @@
 #pragma once
 
 #include <cmath>
-#include <ostream>
+#include <iostream>
 
-namespace pftd 
-{
-namespace utils 
-{
+namespace pftd {
+namespace utils {
 
 /*! sf::Vector2 helyett használt matematikai vektor implementáció. */
 template<typename T>
@@ -19,7 +17,7 @@ struct Vec2
     T y;
 
     Vec2() {}
-    Vec2(T x, T y): 
+    Vec2(T x, T y):
         x{x}, y{y}
     {}
     Vec2(Vec2 const& right):

@@ -1,11 +1,8 @@
+#ifndef CPORTA
+
 #include "resources.hpp"
 
 using namespace pftd;
-
-ResourceManager::~ResourceManager()
-{
-
-}
 
 ResourceManager* ResourceManager::m_instance = nullptr;
 ResourceManager* ResourceManager::create()
@@ -15,7 +12,6 @@ ResourceManager* ResourceManager::create()
     }
 
     m_instance = new ResourceManager{};
-
     return m_instance;
 }
 
@@ -29,24 +25,30 @@ void ResourceManager::loadDefaultFont(std::string const& path)
 
 sf::Texture const& ResourceManager::getTexture(std::string const& source)
 {
-    //auto src = std::filesystem::path{std::filesystem::absolute(source)};
-
     if(m_textures.find(source) != m_textures.end()) {
         return m_textures.at(source);
-    } else { // TODO: add error handling
-        m_textures[source] = sf::Texture{sf::Image{source}};
-        return m_textures[source];
     }
+
+    try {
+        m_textures[source] = sf::Texture{sf::Image{source}};
+    } catch(sf::Exception& sfError) {
+        throw LoadError{"Nem sikerült betölteni a `" + source + "` képfájlt.\nSFML: " + sfError.what()};
+    }
+    return m_textures.at(source);
 }
 
 sf::SoundBuffer const& ResourceManager::getSound(std::string const& source)
 {
-    //auto src = std::filesystem::path{std::filesystem::absolute(source)};
-
     if(m_sounds.find(source) != m_sounds.end()) {
         return m_sounds.at(source);
-    } else { // TODO: add error handling
-        m_sounds[source] = sf::SoundBuffer{source};
-        return m_sounds[source];
     }
+
+    try {
+        m_sounds[source] = sf::SoundBuffer{source};
+    } catch(sf::Exception sfError) {
+        throw LoadError{"Nem sikerült betölteni a `" + source + "` hangfájlt.\nSFML: " + sfError.what()};
+    }
+    return m_sounds.at(source);
 }
+
+#endif

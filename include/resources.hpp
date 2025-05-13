@@ -1,12 +1,12 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "SFML/Graphics.hpp"
 #include "SFML/Audio.hpp"
-
 #include "objects/gui/image.hpp"
 
-namespace pftd 
-{
+namespace pftd {
 
 /*! Az erőforrás-kezelő. */
 class ResourceManager final
@@ -18,7 +18,7 @@ public:
     /**
     * @brief Felszabadítja a tárolt erőforrásokat.
     */
-    ~ResourceManager();
+    ~ResourceManager() = default;
 
     /**
     * @brief Az alapértelmezett (valójában csak ez van) betűtípus betöltése.
@@ -92,7 +92,7 @@ private:
 
     /*! Audio: [source, hang buffer példány] */
     std::unordered_map<std::string, sf::SoundBuffer> m_sounds;
-    
+
 };
 
 /*! Erőforrás-betöltés hiba. */
@@ -102,3 +102,5 @@ struct LoadError : public std::runtime_error
 };
 
 }
+
+#endif

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "all.hpp"
 
 #include "objects/object_base.hpp"
@@ -14,23 +16,24 @@ public:
     /**
     * @brief
     *
-    * @param text Szöveg objektum: maga a szöveg, betűtípus és betűméret.
+    * @param label Szöveg.
+    * @param font Betűtípus.
+    * @param cSize Betűméret.
     * @param color Betűszín.
     */
-    // TODO: pass in string and font seperately, dont rely on temp values
-    Label(sf::Text const& text, sf::Color const& color = sf::Color::White);
+    Label(std::wstring const& label, sf::Font const& font, unsigned int cSize, sf::Color const& color = sf::Color::White);
 
     /**
     * @brief
     *
-    * @param text Szöveg objektum: maga a szöveg, betűtípus és betűméret.
+    * @param label Szöveg.
+    * @param font Betűtípus.
+    * @param cSize Betűméret.
     * @param position Pozíció.
     * @param zIndex Z koordináta.
     * @param color Betűszín.
     */
-    Label(sf::Text const& text, utils::Vec2f position, int zIndex = 0, sf::Color const& color = sf::Color::White);
-
-    // Ezek mind inline-ok. VVV
+    Label(std::wstring const& label, sf::Font const& font, unsigned int cSize, utils::Vec2f position, int zIndex = 0, sf::Color const& color = sf::Color::White);
 
     /**
     * @brief Új szöveg beállítása.
@@ -61,12 +64,6 @@ public:
     */
     sf::Text const& getText() const { return m_text; }
 
-    /**
-    * @brief Objektum megjelenítése.
-    *
-    * @param target Hol legyen megjelenítve? Ez általában egy ablak.
-    * @param states Render-eléshez szükséges egyéb állapotok.
-    */
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override
     {
         target.draw(m_text, states);
@@ -80,3 +77,5 @@ private:
 
 }
 }
+
+#endif

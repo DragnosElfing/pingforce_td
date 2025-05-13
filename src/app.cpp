@@ -1,6 +1,7 @@
+#ifndef CPORTA
+
 #include "all.hpp"
 #include "app.hpp"
-
 #include "resources.hpp"
 
 using namespace pftd;
@@ -9,7 +10,7 @@ using namespace pftd;
 Renderer::Renderer(unsigned int width, unsigned int height, std::string const& title):
     m_width{width}, m_height{height}
 {
-    m_window = new sf::RenderWindow{sf::VideoMode{{m_width, m_height}}, 
+    m_window = new sf::RenderWindow{sf::VideoMode{{m_width, m_height}},
         title, sf::Style::Default, sf::State::Windowed};
 }
 
@@ -21,7 +22,7 @@ Renderer::~Renderer()
 void Renderer::render()
 {
     this->clear();
-    
+
     // Megrajzolunk minden - a queue-ba helyezett - programelemet.
     while(!m_queue.empty()) {
         auto& obj = m_queue.top();
@@ -37,7 +38,6 @@ App::~App()
 {
     m_running = false;
 
-    // Muszáj kondícionálisan, mert lehet (valójában biztos hogy nem, de meh) hogy sose volt meghívva az `App::create`.
     if(m_renderer) delete m_renderer;
     for(auto& [_, scene] : m_scenes) {
         delete scene;
@@ -56,7 +56,7 @@ App* App::create(unsigned int width, unsigned int height, std::string const& tit
     }
     m_instance = new App();
     auto& I = m_instance;
-    
+
     I->m_renderer = new Renderer{width, height, title};
 
     // ResourceManagerrel betöltjük a használt betűtípust (csak ezt az egy van használatban).
@@ -97,7 +97,7 @@ void App::run()
     while(isRunning()) {
         // Események delegálása.
         m_renderer->getWindow()->handleEvents(closeEvent, clickEvent, mouseMoveEvent, keyPressEvent);
-        
+
         // Aktív nézet frissítése.
         m_scenes[m_activeSceneID]->update(clock.restart().asSeconds());
 
@@ -110,7 +110,7 @@ void App::run()
     }
 }
 
-bool App::changeScene(std::string newID, SceneStateFlag flag)
+bool App::changeScene(std::string newID, Scene::StateFlag flag)
 {
     // Már ez a nézet aktív.
     if(m_activeSceneID == newID) return false;
@@ -141,8 +141,10 @@ void App::addScene(std::string id, Scene* scene, bool setActive)
 
     m_scenes[id] = scene;
     if(setActive) {
-        this->changeScene(id); 
+        this->changeScene(id);
     }
 }
 
 ///
+
+#endif

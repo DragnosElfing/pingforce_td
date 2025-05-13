@@ -1,3 +1,6 @@
+#pragma once
+
+#ifndef CPORTA
 
 #include "all.hpp"
 
@@ -7,8 +10,7 @@
 #include "utils/serializable.hpp"
 #include "utils/parsers.hpp"
 
-namespace pftd 
-{
+namespace pftd {
 
 /*! Játéklogikát és entitásokat tartalmazó osztály. */
 class Level : public Object
@@ -28,7 +30,7 @@ public:
         explicit Nest(utils::Vec2f const& position);
         Nest(Nest const& other) = default;
 
-        ~Nest();
+        ~Nest() = default;
 
         Nest* clone() const override;
     };
@@ -37,10 +39,10 @@ public:
     struct Stats : public utils::Serializable
     {
         /*! A maximum HP. */
-        int const MAX_HP = 3;
+        int maxHp = 3;
 
         /*! Jelenlegi HP. */
-        int hp = MAX_HP;
+        int hp = maxHp;
 
         /*! Pontszám. */
         unsigned int score = 0U;
@@ -48,7 +50,7 @@ public:
         /*! Pénz. */
         unsigned int money = 100U;
 
-        explicit Stats();
+        explicit Stats() = default;
         explicit Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth);
 
         void serialize(std::ostream& out) const override;
@@ -59,32 +61,42 @@ public:
 
     /*! Lehelyezni kívánt torony. */
     Tower* selectedTower = nullptr;
-    
+
     /**
     * @brief
     *
+    * @param saveFile Mentésfájl elérési útvonala.
     * @param stats Kezdeti játékállás.
     */
     Level(std::string const& saveFile, Stats stats);
+
+    /**
+    * @brief
+    *
+    * Ilyenkor a játékállást is a mentésfájlból olvassa vissza.
+    *
+    * @param saveFile Mentésfájl elérési útvonala.
+    */
     Level(std::string const& saveFile);
+
     virtual ~Level();
 
     /**
     * @brief HP vesztés.
     *
-    * @param hpLost Ennyi HP-t veszít a játékos. 
+    * @param hpLost Ennyi HP-t veszít a játékos.
     */
     virtual void loseHP(int hpLost = 1);
 
     /**
     * @brief Kiválasztott torny lehelyezése.
     *
-    * @return Sikerült e lehelyezni? 
+    * @return Sikerült e lehelyezni?
     */
     virtual bool placeTower();
 
     /**
-    * @brief Kiválasztott torony törlése. 
+    * @brief Kiválasztott torony törlése.
     */
     void deselectTower();
 
@@ -107,21 +119,24 @@ public:
     /**
     * @brief Vége van e játéknak?
     *
-    * @return Vesztett e a játékos? 
+    * @return Vesztett e a játékos?
     */
-    bool isGameOver() const;
-
-    void save() const;
-
-    void reset(Stats stats);
-    void reset();
+    bool isGameOver() const { return stats.hp <= 0; };
 
     /**
-    * @brief Objektum megjelenítése.
+    * @brief Játékállás mentése.
     *
-    * @param target Hol legyen megjelenítve? Ez általában egy ablak.
-    * @param states Render-eléshez szükséges egyéb állapotok.
+    * `LoadError`-t dobhat, ha nem sikerül megnyitnia a fájlt / nincs engedélye hozzá.
     */
+    void save() const;
+
+    /**
+    * @brief Játék újraindítása.
+    *
+    * "Object Pool" nem használata miatt van.
+    */
+    void reset(Stats stats);
+
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 protected:
@@ -155,6 +170,28 @@ private:
     /*! Előző spawn óta eltelt idő. */
     float m_accuTimeSpawnSec = 0.0f;
 
+    /**
+    * @brief `spawnSeal`-t hívja meg, ha eltelt megfelelő mennyiségű idő.
+    */
+    void _spawnSeal(float dt);
+
+    /**
+    * @brief Kezeli az ellenfeleket.
+    */
+    void _updateSeals(float dt);
+
+    /**
+    * @brief Kezeli a tornyokat.
+    */
+    void _updateTowers(float dt);
+
+    /**
+    * @brief Kezeli a lövedékeket.
+    */
+    void _updateProjectiles(float dt);
+
 };
 
 }
+
+#endif

@@ -1,8 +1,10 @@
+#ifndef CPORTA
+
 #include "objects/clickable.hpp"
 
 using namespace pftd;
 
-Clickable::Clickable(bool active): 
+Clickable::Clickable(bool active):
     isActive{active}
 {
 
@@ -23,7 +25,7 @@ void Clickable::setCallback(std::function<void()> callback)
 void Clickable::handleClick(utils::Vec2i const& clickCoords)
 {
     if(!isActive) return;
-    
+
     auto& xF = clickCoords.x;
     auto& yF = clickCoords.y;
 
@@ -33,3 +35,5 @@ void Clickable::handleClick(utils::Vec2i const& clickCoords)
         this->m_callback();
     }
 }
+
+#endif

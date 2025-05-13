@@ -5,7 +5,7 @@
 namespace pftd {
 namespace utils {
 
-/*! 
+/*!
     Olyan osztályok, amelyek tárolóként (is) használhatók. Fontos: nem egy tárolót tartalmaznak, hanem azok maguk a tárolók (öröklés, nem kompozíció)!
     Ilyen például: `FollowPath`, `Inventory`.
 
@@ -29,14 +29,9 @@ public:
     * @param elem A hozzáadni kívánt dolog.
     * @return Az imént hozzáadott dolog.
     */
-    virtual T* const append(T* elem)
-    { 
-        try {
-            m_container.push_back(elem);
-        } catch(std::runtime_error err) {
-            print(err.what());
-        }
-
+    /*virtual*/ T* const append(T* elem)
+    {
+        m_container.push_back(elem);
         return elem;
     }
 

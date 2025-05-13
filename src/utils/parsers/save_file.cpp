@@ -27,6 +27,7 @@ void SaveFileParser::_getStats()
 {
     m_readStats.score = this->get<unsigned int>();
     m_readStats.wealth = this->get<unsigned int>();
+    m_readStats.maxHp = this->get<int>();
     m_readStats.hp = this->get<int>();
 }
 

@@ -11,49 +11,61 @@ LevelConfigParser::LevelConfigParser(std::string const& sourceFile):
 
 void LevelConfigParser::parse()
 {
-    if(!this->isLabelValid()) return;
+    if(!this->isLabelValid()) {
+        throw ParseError{"Helytelen 'label'!"};
+    }
 
-    while(true) {
+    while(!sourceStream.eof()) {
         // Beolvassuk a következő attribútumot.
-        this->_getAttribute();
+        auto lastAttrib = this->_getAttribute();
 
-        // Ha bármi miatt is ez nem sikerült, akkor be is fejezhettjük.
-        // Ha ill-formed, akkor legyen az: legyen nehéz értelmezni az ebből adódó hibaüzenetet. >:)
-        if(sourceStream.fail() || sourceStream.eof() || sourceStream.bad()) {
-            break;
-        }
-        
         // Fészek infót kaptunk.
-        if(m_lastAttribute == "nestPosition") {
-            m_attribs[m_lastAttribute] = {this->get<utils::Vec2f>()};
+        if(lastAttrib == "nestPosition") {
+            m_attribs[lastAttrib] = {this->get<utils::Vec2f>()};
 
         // Követési útvonal infót kaptunk.
-        } else if(m_lastAttribute == "followPath") {
+        } else if(lastAttrib == "followPath") {
             // Hiba: nem array.
-            if(this->get<char>() != '[') break;
-
-            // Beolvassuk amíg vagy nem érünk el egy zárójelet, vagy fájlvége (gonoszság again), vagy ill-formed (lásd a fentebbi kommentet).
-            m_attribs[m_lastAttribute] = {};
-            while(!(this->peekAhead() == ']' || sourceStream.eof() || sourceStream.bad())) {
-                m_attribs[m_lastAttribute].push_back({this->get<float>(), this->get<float>()});
+            if(this->get<char>() != '[') {
+                throw ParseError{"Hiba beolvasás közben: a `followPath` attribútum 'array' típusú értéket vár el!"};
             }
 
+            // Beolvassuk amíg vagy nem érünk el egy zárójelet, vagy fájlvége, vagy ill-formed.
+            m_attribs[lastAttrib] = {};
+            do {
+                m_attribs[lastAttrib].push_back(this->get<utils::Vec2f>());
+            } while(this->peekAhead() != ']');
+            // Magát a zárójelet is beolvassuk.
+            this->get<char>();
+
         }
+
+        // Hátha már a fájl végén vagyunk. Ekkor már a ciklusnak vége lesz.
+        this->peekAhead();
     }
 }
 
 std::vector<pftd::utils::Vec2f> LevelConfigParser::getAttribute(std::string name) const
 {
+    // Nem nézünk hibát, elég, amit az STL internally dob.
     return m_attribs.at(name);
 }
 
 std::string LevelConfigParser::_getAttribute()
 {
-    // Biztosan string.
+    // Attribútum név (+ kettőspont a végén).
     auto attribName = this->get<std::string>();
-    // Kettőspontot elhagyjuk.
-    attribName = attribName.substr(0, attribName.size() - 1);
+    if(sourceStream.fail() || sourceStream.bad()) {
+        throw ParseError{"Hiba beolvasás közben!"};
+    }
 
-    m_lastAttribute = attribName;
-    return m_lastAttribute;
+    if (attribName.empty() || attribName.back() != ':') {
+        print(attribName);
+        throw ParseError{"Nem sikerült beolvasni az attribútum nevét! Lehet a kettőspont lemaradt?"};
+    }
+
+    // Kettőspontot elhagyjuk.
+    attribName.pop_back();
+
+    return attribName;
 }

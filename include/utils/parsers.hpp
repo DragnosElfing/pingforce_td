@@ -2,12 +2,14 @@
 
 #include "all.hpp"
 
-namespace pftd 
+namespace pftd {
+namespace utils {
+namespace parser {
+
+struct ParseError : std::runtime_error
 {
-namespace utils 
-{
-namespace parser 
-{
+    using std::runtime_error::runtime_error;
+};
 
 class Parser
 {
@@ -19,7 +21,7 @@ public:
     * @param label A karaktersor, amellyel kötelezően kezdődnie kell a fájlnak.
     */
     Parser(std::string const& sourceFile, std::string label = "");
-    
+
     virtual ~Parser();
 
     /**
@@ -65,9 +67,13 @@ public:
             this->_skipWhitespace();
         }
 
-        // Ha hibás? Nincs olyan...
+
         T got;
         sourceStream >> got;
+        if (sourceStream.fail() || sourceStream.bad()) {
+            throw ParseError{"(" + validLabel + ") Nem sikerült beolvasni a következő tokent!"};
+        }
+
         return got;
     }
 
@@ -110,7 +116,7 @@ private:
 
 };
 
-/*! 
+/*!
     Egy szint alap beállításait tudjuk vele betölteni:
     az ellenfelek által követett útvonalat és a fészek helyzetét.
 */
@@ -124,7 +130,6 @@ public:
     std::vector<Vec2f> getAttribute(std::string name) const;
 
 private:
-    std::string m_lastAttribute;
     std::unordered_map<std::string, std::vector<Vec2f>> m_attribs;
 
     std::string _getAttribute();
@@ -136,14 +141,14 @@ class SaveFileParser final : public Parser
 {
 public:
     /*! Mentett játék betöltéséhez használt statisztika osztály. */
-    struct StatsInfo 
+    struct StatsInfo
     {
         unsigned int score, wealth;
-        int hp;
+        int maxHp, hp;
     };
 
     /*! Mentett játék betöltéséhez használt entitás típusok. */
-    enum class EntityType 
+    enum class EntityType
     {
         TOWER = 0U,
         SEAL,
@@ -151,7 +156,7 @@ public:
     };
 
     /*! Mentett játék betöltéséhez használt entitás infó. */
-    struct EntityInfo 
+    struct EntityInfo
     {
         /*! Típusa. */
         EntityType entityType;
@@ -210,11 +215,6 @@ private:
 
     void _getStats();
     void _getEntity();
-};
-
-struct ParseError : std::runtime_error
-{
-    using std::runtime_error::runtime_error;
 };
 
 }

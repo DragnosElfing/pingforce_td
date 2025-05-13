@@ -1,11 +1,13 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "objects/entities/entity_base.hpp"
 #include "objects/entities/seals/followpath.hpp"
+#include "utils/serializable.hpp"
 #include "utils/substitute_types.hpp"
 
-namespace pftd 
-{
+namespace pftd {
 
 enum class SealID
 {
@@ -29,7 +31,7 @@ public:
     float speed;
 
     /*! Pénz amit ad halál után. */
-    unsigned int value; 
+    unsigned int value;
 
     virtual ~Seal() = default;
 
@@ -39,19 +41,9 @@ public:
     * A `followPath` pontjai közt lineárisan interpolál.
     */
     void lerpPath();
-    
-    /**
-    * @brief Egy dinamikus memóriában foglalt másolatot készít a fókából.
-    *
-    * @return A másolat.
-    */
+
     virtual Seal* clone() const override = 0;
 
-    /**
-    * @brief Update.
-    *
-    * @param dt Delta idő.
-    */
     void update(float dt) override;
 
     /**
@@ -73,12 +65,10 @@ public:
     *
     * Szükség van rá, amikor mentett állást töltünk.
     */
-    void setLerpState(float param, bool backwards = false) 
-    { 
+    void setLerpState(float param, bool backwards = false)
+    {
         lerpParam = std::min(1.0f, std::max(param, 0.0f));
-        print(param << " " << lerpParam);
         reachedNest = backwards;
-        print(reachedNest); 
     }
 
     /**
@@ -105,10 +95,10 @@ protected:
     * @param zIndex Z koordináta.
     */
     Seal(FollowPath const& followPath, std::string const& spriteSrc, utils::Vec2f const& size, int hp, float speed, unsigned int value, int zIndex = 0);
-    
+
     /*! Az útvonal amin végigmegy. */
     FollowPath const& followPath;
-    
+
     // Interpolációhoz
 
     /*! 0-tól 1-ig terjedő paraméter az interpolációhoz. */
@@ -124,11 +114,10 @@ protected:
     EndPoint nextPoint;
 
 private:
-    /**
-    * @brief Animáció: képkocka léptetése. 
-    */
     void advanceAnimationFrame() override;
 
 };
 
 }
+
+#endif

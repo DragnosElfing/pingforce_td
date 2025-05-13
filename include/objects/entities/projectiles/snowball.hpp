@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "objects/entities/projectiles/projectile_base.hpp"
 
 namespace pftd {
@@ -17,13 +19,10 @@ public:
     */
     Snowball(utils::Vec2f const& position, utils::Vec2f direction, float speed = 50.0f);
 
-    /**
-    * @brief Egy dinamikus memóriában foglalt másolatot készít az entitásról.
-    *
-    * @return A másolat.
-    */
-    Entity* clone() const override;
+    Snowball* clone() const override;
 
 };
 
 }
+
+#endif

@@ -1,12 +1,12 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "all.hpp"
 
 #include "objects/object_base.hpp"
-#include "utils/substitute_types.hpp"
 
-namespace pftd
-{
+namespace pftd {
 
 /*! Kattintható (interaktálható) objektum. */
 class Clickable : public Object
@@ -38,4 +38,6 @@ protected:
 
 };
 
-};
+}
+
+#endif

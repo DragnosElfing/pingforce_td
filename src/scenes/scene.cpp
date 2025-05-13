@@ -1,3 +1,5 @@
+#ifndef CPORTA
+
 #include "scene.hpp"
 #include "resources.hpp"
 
@@ -27,7 +29,7 @@ void Scene::setMusic(std::string const& source, float volume)
     backgroundMusic->setVolume(volume);
 }
 
-void Scene::toggleActive(SceneStateFlag)
+void Scene::toggleActive(Scene::StateFlag)
 {
     isActive = !isActive;
 
@@ -40,3 +42,5 @@ void Scene::toggleActive(SceneStateFlag)
         backgroundMusic->stop();
     }
 }
+
+#endif

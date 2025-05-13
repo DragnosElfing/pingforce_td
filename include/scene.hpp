@@ -1,28 +1,30 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "all.hpp"
 #include "SFML/Window/Event.hpp"
 #include "objects/object_base.hpp"
 
-namespace pftd 
-{
-
-enum class SceneStateFlag : uint8_t
-{
-    NONE = 0,
-    LOAD_STATE = 1 << 0
-};
+namespace pftd {
 
 /*! Nézet ősosztály. */
-class Scene 
+class Scene
 {
     using ObjPtrVec = std::vector<Object*>;
 public:
+    /*! Plusz információt közlő opciók. */
+    enum class StateFlag : uint8_t
+    {
+        NONE = 0,
+        LOAD_STATE = 1 << 0
+    };
+
     Scene() = default;
 
     Scene(Scene const&) = delete;
     Scene(Scene&&) noexcept = delete;
-    
+
     /**
     * @brief Törli a kezelt objektumokat.
     */
@@ -52,8 +54,10 @@ public:
 
     /**
     * @brief Nézet aktiválása/deaktiválása: aktív -> nem aktív VAGY nem aktív -> aktív.
+    *
+    * @param flag Egyéb "kérést" közlő opció flag.
     */
-    virtual void toggleActive(SceneStateFlag flag = SceneStateFlag::NONE);
+    virtual void toggleActive(StateFlag flag = StateFlag::NONE);
 
     /**
     * @brief Delegált események kezelése.
@@ -68,7 +72,7 @@ public:
     * @param dt Delta idő.
     */
     virtual void update(float dt) = 0;
-    
+
 protected:
     /*! Aktív e. */
     bool isActive = false;
@@ -78,7 +82,9 @@ protected:
 
     /*! Háttérzene. */
     sf::Music* backgroundMusic = nullptr;
-    
+
 };
 
 }
+
+#endif

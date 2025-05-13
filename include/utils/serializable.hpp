@@ -2,14 +2,11 @@
 
 #include "all.hpp"
 
-namespace pftd 
-{
-namespace utils 
-{
-
+namespace pftd {
+namespace utils {
 
 /*! Szérializálható osztályok. */
-class Serializable 
+class Serializable
 {
 public:
     /**
@@ -22,7 +19,7 @@ public:
     /**
     * @brief Beolvas egy streamről.
     *
-    * Megjegyzés: nincs használva, a `SaveFileParser` intézi.
+    * Megjegyzés: nincs használva, a `SaveFileParser` intézi a neki szánt munkát.
     *
     * @param in A stream.
     */

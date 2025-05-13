@@ -1,3 +1,5 @@
+#ifndef CPORTA
+
 #include "all.hpp"
 
 #include "objects/entities/projectiles/projectile_base.hpp"
@@ -12,8 +14,10 @@ Snowball::Snowball(utils::Vec2f const& position, utils::Vec2f direction, float s
     this->id = ProjectileID::SNOWBALL;
 }
 
-Entity* Snowball::clone() const
+Snowball* Snowball::clone() const
 {
     return new Snowball{position, direction, linearSpeed};
 }
 ///
+
+#endif

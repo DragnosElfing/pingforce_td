@@ -1,6 +1,11 @@
 pingforce
 
 # stats
-0 250 3
+# Formátum: <pont> <pénz> <max. HP> <HP>
+5400 1650 3 3
 # entities
-seal 3 -61.6752 155 0.00950724 0 10
+# Formátum: <típus: "seal" | "penguin" | "projectile"> <ID: int> <pozíció: Vec2f> [ entitás típustól függő adatok... ]
+penguin 0 548 408
+penguin 1 110 199
+penguin 1 597 194
+seal 0 -7.18542 155 0.0233969 0 1

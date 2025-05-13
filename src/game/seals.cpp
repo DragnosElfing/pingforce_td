@@ -1,3 +1,5 @@
+#ifndef CPORTA
+
 #include "all.hpp"
 
 #include "objects/entities/seals/fortified_zombie_cub.hpp"
@@ -18,7 +20,7 @@ using namespace pftd;
 /// Regular
 RegularSeal::RegularSeal(FollowPath const& followpath):
     Seal{followpath,
-    utils::Random::generate(std::uniform_real_distribution<float>()) <= BANANACHANCE ? "res/images/seals/banana.png" : "res/images/seals/reg.png", 
+    utils::Random::generate(std::uniform_real_distribution<float>()) <= BANANACHANCE ? "res/images/seals/banana.png" : "res/images/seals/reg.png",
         {170, 170}, 2, 40.0f, 50}
 {
     id = SealID::REGULAR;
@@ -68,3 +70,5 @@ Seal* FZC::clone() const
     return new FZC{followPath};
 }
 ///
+
+#endif

@@ -1,3 +1,5 @@
+#ifndef CPORTA
+
 #include "objects/entities/entity_base.hpp"
 #include "objects/entities/projectiles/projectile_base.hpp"
 #include "objects/entities/towers/tower_base.hpp"
@@ -28,7 +30,7 @@ Entity::Entity(std::string const& spriteSheetSrc, utils::Vec2i spriteSize, utils
 
 }
 
-// TODO: nem csak 1024x1024-es lehet
+// Csak 1024x1024-eset fogad el!
 Entity::Entity(std::string const& spriteSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
     Entity{spriteSrc, {1024, 1024}, position, size, zIndex}
 {
@@ -36,7 +38,13 @@ Entity::Entity(std::string const& spriteSrc, utils::Vec2f const& position, utils
 }
 
 Entity::Entity(Entity const& other):
-    Entity{other.spriteSheet, other.cellSize, other.getPosition(), other.size, other.zIndex}
+    Entity{
+        other.spriteSheet,
+        other.cellSize,
+        other.getPosition(),
+        other.size,
+        other.zIndex
+    }
 {
 
 }
@@ -56,10 +64,13 @@ void Entity::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     if(currentSprite) {
         currentSprite->draw(target, states);
+
+        #ifdef _PFTD_DEBUG
         sf::CircleShape circle {10.0f};
         circle.setFillColor(sf::Color::Red);
         circle.setPosition({position.x, position.y});
         target.draw(circle, states);
+        #endif
     }
 }
 
@@ -97,30 +108,37 @@ void Entity::resetAnimation()
 ///
 
 /// Tower
-Tower::Tower(std::string const& spriteSheetSrc, utils::Vec2i spriteSize, float attackSpeedSec, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
-    Entity{spriteSheetSrc, spriteSize, position, size, zIndex},
 
-    attackSpeedSec{attackSpeedSec},
-    spawnProjectile{[](Projectile*){}}
+Tower::TowerProperties::TowerProperties(TowerID id, float radius, float attackRange, float attackSpeed,
+    unsigned int attackDamage, bool instant, unsigned int price):
+    id{id}, radiusPixel{radius}, attackRangePixel{attackRange}, attackSpeedSec{attackSpeed},
+    attackDamage{attackDamage}, instantAttack{instant}, price{price}
 {
-    frameDurationSec = attackSpeedSec / CELL_N;
+
 }
 
-Tower::Tower(std::string const& spriteSrc, float attackSpeedSec, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
-    Tower{spriteSrc, {1024, 1024}, attackSpeedSec, position, size, zIndex}
+Tower::Tower(TowerProperties const& props, std::string const& spriteSheetSrc, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+    Entity{spriteSheetSrc, spriteSize, position, size, zIndex},
+
+    properties{props},
+    spawnProjectile{[](Projectile*){}}
+{
+    frameDurationSec = properties.attackSpeedSec / CELL_N;
+}
+
+Tower::Tower(TowerProperties const& props, std::string const& spriteSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+    Tower{props, spriteSrc, {1024, 1024}, position, size, zIndex}
 {
 
 }
 
 Tower::Tower(Tower const& other):
     Entity{other},
-    radiusPixel{other.radiusPixel},
-    attackRangePixel{other.attackRangePixel},
-    attackSpeedSec{other.attackSpeedSec},
-    price{other.price},
-    id{other.id}
+    properties{other.properties},
+    target{nullptr}
 {
-    frameDurationSec = attackSpeedSec / CELL_N;
+    // Ezt máshol nem lehet beállítani.
+    frameDurationSec = properties.attackSpeedSec / CELL_N;
 }
 
 void Tower::setProjSpawnCb(ProjSpawnFunc callback)
@@ -131,7 +149,7 @@ void Tower::setProjSpawnCb(ProjSpawnFunc callback)
 void Tower::attack()
 {
     if(target) {
-        if(instantAttack) target->damage();
+        if(properties.instantAttack) target->damage();
         // else spawnProjectile(...)
     }
 }
@@ -139,11 +157,11 @@ void Tower::attack()
 bool Tower::lookForTarget(std::vector<Seal*> const& enemies)
 {
     // Shorthand.
-    auto const inRange = [this](Seal* to) { 
-        return utils::Vec2f::distance(to->getPosition(), this->getPosition()) < attackRangePixel; 
+    auto const inRange = [this](Seal* to) {
+        return utils::Vec2f::distance(to->getPosition(), this->getPosition()) < properties.attackRangePixel;
     };
 
-    // Ha már van target, akkor nem keresünk újat.
+    // // Ha már van target, akkor nem keresünk újat.
     // if(target && inRange(target)) {
     //     return true;
     // }
@@ -167,7 +185,7 @@ void Tower::update(float dt)
     Entity::update(dt);
 
     if(target) {
-        if(attackTimerSec >= attackSpeedSec) {
+        if(attackTimerSec >= properties.attackSpeedSec) {
             attackTimerSec = 0.0f;
             this->attack();
         }
@@ -185,14 +203,14 @@ void Tower::advanceAnimationFrame()
 
 void Tower::serialize(std::ostream& out) const
 {
-    out << "penguin " << static_cast<int>(id) << ' ' << position << '\n';
+    out << "penguin " << static_cast<int>(properties.id) << ' ' << position << '\n';
 }
 ///
 
 /// Seal
 Seal::Seal(FollowPath const& followPath, std::string const& spriteSrc, utils::Vec2f const& size, int hp, float speed, unsigned int value, int zIndex):
     Entity(spriteSrc, {}, size, zIndex),
-    
+
     hp{hp},
     speed{speed},
     value{value},
@@ -225,7 +243,7 @@ void Seal::lerpPath()
 
     auto from = *points.at(fromIdx);
     auto to = *points.at(fromIdx + 1);
-    auto t = (lerpProgress - (fromIdx != 0 ? totalLength.at(fromIdx - 1) : 0)) 
+    auto t = (lerpProgress - (fromIdx != 0 ? totalLength.at(fromIdx - 1) : 0))
         / utils::Vec2f::distance(from, to);
 
     this->setPosition(from*(1-t) + to*t);
@@ -282,7 +300,7 @@ void Seal::serialize(std::ostream& out) const
 ///
 
 /// Projectile
-Projectile::Projectile(std::string const& spriteSrc, utils::Vec2f const& position, 
+Projectile::Projectile(std::string const& spriteSrc, utils::Vec2f const& position,
     utils::Vec2f const& size, utils::Vec2f const& direction, float speed, float angularSpeed, int zIndex):
     Entity{spriteSrc, position, size, zIndex},
 
@@ -303,3 +321,5 @@ void Projectile::serialize(std::ostream& out) const
     out << "projectile " << static_cast<int>(id) << ' ' << position << ' ' << direction << ' ' << linearSpeed << '\n';
 }
 ///
+
+#endif

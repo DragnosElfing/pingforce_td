@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "objects/entities/seals/seal_base.hpp"
 
 namespace pftd {
@@ -15,13 +17,10 @@ public:
     */
     FZC(FollowPath const& followpath);
 
-    /**
-    * @brief Egy dinamikus memóriában foglalt másolatot készít a fókából.
-    *
-    * @return A másolat.
-    */
     Seal* clone() const override;
-    
+
 };
 
 }
+
+#endif

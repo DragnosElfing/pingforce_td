@@ -1,17 +1,18 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "objects/entities/entity_base.hpp"
 #include "utils/serializable.hpp"
 #include "utils/substitute_types.hpp"
 
-namespace pftd 
-{
+namespace pftd {
 
 enum class ProjectileID
 {
     SNOWBALL = 0,
 };
-    
+
 class Projectile : public Entity, public utils::Serializable
 {
 public:
@@ -26,11 +27,6 @@ public:
 
     virtual ~Projectile() = default;
 
-    /**
-    * @brief Update.
-    *
-    * @param dt Delta idő.
-    */
     virtual void update(float dt) override;
 
     void serialize(std::ostream& out) const override;
@@ -50,10 +46,11 @@ protected:
     * @param angularSpeed Forgási sebesség (radián / mp).
     * @param zIndex Z koordináta.
     */
-    Projectile(std::string const& spriteSrc, utils::Vec2f const& position, 
+    Projectile(std::string const& spriteSrc, utils::Vec2f const& position,
         utils::Vec2f const& size, utils::Vec2f const& direction, float speed, float angularSpeed = 0.0f, int zIndex = 0);
-
 
 };
 
 }
+
+#endif

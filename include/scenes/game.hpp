@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "objects/gui/image.hpp"
 #include "objects/gui/button.hpp"
 #include "utils/hetero_collection.hpp"
@@ -7,8 +9,7 @@
 #include "resources.hpp"
 #include "scene.hpp"
 
-namespace pftd
-{
+namespace pftd {
 
 /*! Játék nézet. */
 class GameScene final : public Scene
@@ -35,12 +36,6 @@ public:
         InventoryItem(Tower* tower, Level * const level, utils::Vec2f const& position, utils::Vec2f const& size);
         ~InventoryItem();
 
-        /**
-        * @brief Objektum megjelenítése.
-        *
-        * @param target Hol legyen megjelenítve? Ez általában egy ablak.
-        * @param states Render-eléshez szükséges egyéb állapotok.
-        */
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     };
 
@@ -49,7 +44,7 @@ public:
     {
         /*! Háttér. */
         gr::Sprite background;
-        
+
         /**
         * @brief
         *
@@ -58,38 +53,17 @@ public:
         Inventory(std::string const& backgroundImageSrc);
         ~Inventory() = default;
 
-        /**
-        * @brief Objektum megjelenítése.
-        *
-        * @param target Hol legyen megjelenítve? Ez általában egy ablak.
-        * @param states Render-eléshez szükséges egyéb állapotok.
-        */
         void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     };
 
     GameScene();
     ~GameScene();
 
-    /**
-    * @brief Delegált események kezelése.
-    *
-    * @param event Kezelni kívánt esemény.
-    */
     void onEvent(sf::Event const& event) override;
 
-    /**
-    * @brief Update.
-    *
-    * @param dt Delta idő.
-    */
     void update(float dt) override;
 
-    /**
-    * @brief Nézet aktiválása/deaktiválása.
-    *
-    * @return Történt e állapot változás.
-    */
-    void toggleActive(SceneStateFlag flag = SceneStateFlag::NONE) override;
+    void toggleActive(Scene::StateFlag flag = Scene::StateFlag::NONE) override;
 
     /**
     * @brief Játék elindítása.
@@ -133,6 +107,13 @@ private:
     /*! Játéklogikát tartalmazó "szint."*/
     Level* m_level = nullptr;
 
+    /**
+    * @brief Hozzáadja az `m_inventory`-hoz az `InventoryItem`-eket.
+    */
+    void _constructInventory();
+
 };
 
 }
+
+#endif
