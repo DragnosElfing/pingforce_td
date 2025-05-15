@@ -1,26 +1,23 @@
-#ifndef CPORTA
+#include "mock_objects/mock_entities/entity_base.hpp"
+#include "mock_objects/mock_entities/mock_projectiles/projectile_base.hpp"
+#include "mock_objects/mock_entities/mock_towers/tower_base.hpp"
+#include "mock_objects/mock_entities/mock_seals/seal_base.hpp"
+#include "mock/rman.hpp"
 
-#include "objects/entities/entity_base.hpp"
-#include "objects/entities/projectiles/projectile_base.hpp"
-#include "objects/entities/towers/tower_base.hpp"
-#include "objects/entities/seals/seal_base.hpp"
-#include "resources.hpp"
-
-using namespace pftd;
+using namespace pftd_test;
 
 /// Entity
 
-Entity::Entity(sf::Texture const& texture, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
+Entity::Entity(int texture, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
     Object{position, size, zIndex},
     spriteSheet{texture},
     cellSize{spriteSize},
-    CELL_N{spriteSheet.getSize().x / cellSize.x},
+    CELL_N{/* ... */ 1U / cellSize.x},
     currentCell{0U},
     totalElapsedSec{0.0f}
 {
     currentSprite = new gr::Sprite{
-        spriteSheet, {{static_cast<int>(currentCell * cellSize.x), 0}, {cellSize.x, cellSize.y}},
-        this->position - this->size / 2, this->size, zIndex
+        spriteSheet, this->position - this->size / 2, this->size, zIndex
     };
 }
 
@@ -30,7 +27,6 @@ Entity::Entity(std::string const& spriteSheetSrc, utils::Vec2i spriteSize, utils
 
 }
 
-// Csak 1024x1024-eset fogad el!
 Entity::Entity(std::string const& spriteSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex):
     Entity{spriteSrc, {1024, 1024}, position, size, zIndex}
 {
@@ -60,10 +56,10 @@ void Entity::update(float dt)
     this->advanceAnimationFrame();
 }
 
-void Entity::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void Entity::draw() const
 {
     if(currentSprite) {
-        currentSprite->draw(target, states);
+        currentSprite->draw();
     }
 }
 
@@ -86,7 +82,7 @@ void Entity::advanceAnimationFrame()
         currentCell += 1;
         currentCell %= CELL_N;
 
-        currentSprite->setSpriteRect({{static_cast<int>(currentCell * cellSize.x), 0}, {cellSize.x, cellSize.y}});
+        currentSprite->setSpriteRect({static_cast<int>(currentCell * cellSize.x), 0}, {cellSize.x, cellSize.y});
     }
 }
 
@@ -96,7 +92,7 @@ void Entity::resetAnimation()
 
     currentCell = 0U;
     totalElapsedSec = 0.0f;
-    currentSprite->setSpriteRect({{0, 0}, {cellSize.x, cellSize.y}});
+    currentSprite->setSpriteRect({0, 0}, {cellSize.x, cellSize.y});
 }
 ///
 
@@ -253,9 +249,7 @@ void Seal::damage(int hpLost)
     }
 
     if(hp > 0) {
-        // Egyre pirosabbak, ahogy sebződnek.
-        uint8_t newGB = std::max(255 - 155 / hp, 0);
-        this->getSprite()->modColor({255, newGB, newGB, 255});
+        this->getSprite()->modColor(0xFF0000FF);
     }
 }
 
@@ -314,5 +308,3 @@ void Projectile::serialize(std::ostream& out) const
     out << "projectile " << static_cast<int>(id) << ' ' << position << ' ' << direction << ' ' << linearSpeed << '\n';
 }
 ///
-
-#endif

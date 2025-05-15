@@ -13,6 +13,7 @@ enum class ProjectileID
     SNOWBALL = 0,
 };
 
+/*! Lövedék ősosztály. */
 class Projectile : public Entity, public utils::Serializable
 {
 public:

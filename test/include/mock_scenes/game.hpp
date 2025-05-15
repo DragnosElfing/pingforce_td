@@ -6,8 +6,7 @@
 #include "mock_game/level.hpp"
 #include "mock/scene.hpp"
 
-namespace pftd_test
-{
+namespace pftd_test {
 
 using namespace pftd;
 
@@ -15,6 +14,8 @@ using namespace pftd;
 class GameScene final : public Scene
 {
 public:
+    static constexpr char const* SAVE_FILE_PATH = "res/data/save.dat";
+
     struct InventoryItem : public Clickable
     {
         gr::Sprite frame;
@@ -22,8 +23,7 @@ public:
         Tower* towerToSpawn = nullptr;
         gr::Label priceLabel;
 
-        InventoryItem(Tower* tower, Level * const level, std::string const& iconSrc,
-            utils::Vec2f const& position, utils::Vec2f const& size);
+        InventoryItem(Tower* tower, Level * const level, utils::Vec2f const& position, utils::Vec2f const& size);
         ~InventoryItem();
 
         virtual void draw() const;
@@ -44,12 +44,14 @@ public:
 
     void onEvent(int event) override;
     void update(float dt) override;
-    bool toggleActive(bool isActive) override;
+    bool toggleActive(StateFlag flag = StateFlag::NONE) override;
     void startGame();
     void updateScore();
     void updateWealth();
 
 //private:
+    bool m_shouldLoadSaved = false;
+
     gr::Button* m_saveButt = nullptr;
     gr::Label* m_moneyCounter = nullptr;
     gr::Label* m_scoreCounter = nullptr;

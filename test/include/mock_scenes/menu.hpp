@@ -3,15 +3,14 @@
 #include "mock_objects/mock_gui/button.hpp"
 #include "mock/scene.hpp"
 
-namespace pftd_test
-{
+namespace pftd_test {
 
 /*! Menü nézet tesztelésre szánt változata. */
 class MenuScene final : public Scene
 {
 public:
     MenuScene();
-    ~MenuScene();
+    ~MenuScene() = default;
 
     void onEvent(int event) override;
     void update(float dt) override;

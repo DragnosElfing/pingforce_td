@@ -8,10 +8,16 @@ namespace pftd_test
 
 using namespace pftd;
 
+enum class ProjectileID
+{
+    SNOWBALL = 0,
+};
+
 /*! Lövedék teszteléshez. */
-class Projectile : public Entity
+class Projectile : public Entity, public utils::Serializable
 {
 public:
+    ProjectileID id;
     utils::Vec2f direction;
     float linearSpeed;
     float angularVelocityRadPerSec;
@@ -19,6 +25,7 @@ public:
     virtual ~Projectile() = default;
 
     virtual void update(float dt) override;
+    void serialize(std::ostream& out) const override;
 
 //protected:
     Projectile(std::string const& spriteSrc, utils::Vec2f const& position, 

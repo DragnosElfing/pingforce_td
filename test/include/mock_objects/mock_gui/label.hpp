@@ -4,10 +4,8 @@
 
 #include "mock_objects/object_base.hpp"
 
-namespace pftd_test 
-{
-namespace gr 
-{
+namespace pftd_test {
+namespace gr {
 
 using namespace pftd;
 
@@ -15,8 +13,8 @@ using namespace pftd;
 class Label final : public Object
 {
 public:
-    Label(std::string const& text, uint32_t color = 0xFF'FF'FF);
-    Label(std::string const& text, utils::Vec2f position, int zIndex = 0, uint32_t color = 0xFF'FF'FF);
+    Label(std::wstring const& label, int font, unsigned int cSize, uint32_t color = 0xFF'FF'FF'FF);
+    Label(std::wstring const& label, int font, unsigned int cSize, utils::Vec2f position, int zIndex = 0, uint32_t color = 0xFF'FF'FF);
 
     void setLabel(std::string const& newLabel);
     void setOutline(uint32_t color, float thickness = 1.0f);
@@ -24,7 +22,7 @@ public:
     std::string const& getText() const { return m_text; }
     void draw() const override;
 
-private:
+//private:
     std::string m_text;
 
 };

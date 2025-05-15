@@ -1,13 +1,10 @@
-#ifndef CPORTA
-
-#include "game/level.hpp"
-#include "objects/entities/all_entities.hpp"
+#include "mock_game/level.hpp"
+#include "mock_objects/mock_entities/all_entities.hpp"
 #include "utils/parsers.hpp"
-#include "utils/random_gen.hpp"
-#include "app.hpp"
-#include "resources.hpp"
+#include "mock/app.hpp"
+#include "mock/rman.hpp"
 
-using namespace pftd;
+using namespace pftd_test;
 using Stats = Level::Stats;
 using Nest = Level::Nest;
 using FP = FollowPath;
@@ -44,7 +41,7 @@ Level::Level(std::string const& saveFile, Stats stats):
     Object{{}, {}},
 
     stats{stats},
-    config{"res/data/level.conf"},
+    config{"test/f/valid_level.conf"},
     saveFile{saveFile}
 {
     config.parse();
@@ -60,7 +57,7 @@ Level::Level(std::string const& saveFile, Stats stats):
 Level::Level(std::string const& saveFile):
     Object{{}, {}},
 
-    config{"res/data/level.conf"},
+    config{"test/f/valid_level.conf"},
     saveFile{saveFile}
 {
     // Először a konfig ...
@@ -181,7 +178,7 @@ void Level::loseHP(int hpLost)
         stats.hp -= hpLost;
     }
 
-    nest->getSprite()->setSpriteRect({{(stats.maxHp - stats.hp)*1024, 0}, {1024, 1024}});
+    nest->getSprite()->setSpriteRect({(stats.maxHp - stats.hp)*1024, 0}, {1024, 1024});
 }
 
 bool Level::placeTower()
@@ -189,7 +186,7 @@ bool Level::placeTower()
     if(!selectedTower) return false;
 
     for(auto& tower : towers) {
-        // Ha pályán kívülre szeretnénk: ne.
+        // Ha túl közel szeretnénk egymáshoz: ne.
         if(utils::Vec2f::distance(tower->getPosition(), selectedTower->getPosition())
             <= std::max(tower->properties.radiusPixel, selectedTower->properties.radiusPixel)) {
             return false;
@@ -230,8 +227,7 @@ void Level::spawnSeal()
 {
     Seal* newSeal = nullptr;
 
-    std::uniform_real_distribution<float> dist {0.0, 1.0};
-    float const r = utils::Random::generate(dist);
+    float const r = 0.5; // Nem használunk véletlent tesztekben.
     if(r <= 0.4f) {
         newSeal = new RegularSeal{followPath};
     } else if(r <= 0.6f) {
@@ -295,7 +291,6 @@ void Level::_updateSeals(float dt)
 
 void Level::_updateProjectiles(float dt)
 {
-    // Lehetne szebb is. (egy ObjectPool tényleg mindent megoldana)
     for(auto it = projectiles.begin(); it != projectiles.end();) {
         auto& proj = *it;
 
@@ -313,10 +308,9 @@ void Level::_updateProjectiles(float dt)
         }
 
         if(!deletion) {
-            auto projPos = sf::Vector2i{static_cast<int>(proj->getPosition().x), static_cast<int>(proj->getPosition().y)};
+            auto projPos = proj->getPosition();
             // Kijött a képernyőből.
-            if(!sf::IntRect{{0, 0}, {App::getInstance()->getWindowWidth(), App::getInstance()->getWindowHeight()}}
-                .contains(projPos)) {
+            if(projPos.x <= 0 || projPos.y <= 0 || projPos.x >= App::getInstance()->getWindowWidth() || projPos.y >= App::getInstance()->getWindowHeight()) {
                     delete proj;
                     it = projectiles.erase(it);
                     deletion = true;
@@ -368,22 +362,20 @@ void Level::save() const
     save_f.close();
 }
 
-void Level::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void Level::draw() const
 {
-    if(nest) nest->draw(target, states);
+    if(nest) nest->draw();
     for(auto& tower : towers) {
-        tower->draw(target, states);
+        tower->draw();
     }
     for(auto& seal : seals) {
-        seal->draw(target, states);
+        seal->draw();
     }
     for(auto& proj : projectiles) {
-        proj->draw(target, states);
+        proj->draw();
     }
 
-    if(selectedTower) selectedTower->draw(target, states);
+    if(selectedTower) selectedTower->draw();
 }
 
 ///
-
-#endif

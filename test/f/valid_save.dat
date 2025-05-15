@@ -1,10 +1,10 @@
 pingforce
 
 # stats
-5400 1650 3 3
+5400 1650 5 3
 # entities
 penguin 0 548 408
 penguin 1 110 199
 penguin 1 597 194
-# Innen hiányzik a "t" paraméter
-seal 0 -7.18542 155 0 1
+seal 0 -7.18542 155 0.02 0 1
+projectile 0 100.56 100.5 0.78 0.6 60

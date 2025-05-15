@@ -10,5 +10,4 @@ Makefile
 asd
 leak.txt
 
-# JPorta biztosítja
-#src/tests/gtest_lite.h
+test/f/OLVASSEL.txt

@@ -9,20 +9,35 @@ namespace pftd_test
 
 using namespace pftd;
 
+enum class TowerID
+{
+    SNOWBALLER = 0,
+    ICICLE_STABBER
+};
+
 /*! Torony (pingvin) teszteléshez. */
-class Tower : public Entity
+class Tower : public Entity, public utils::Serializable
 {
     using ProjSpawnFunc = std::function<void(Projectile*)>;
 public:
-    float radiusPixel = 120.0f;
-    float attackRangePixel = 100.0f;
-    float attackSpeedSec;
-    unsigned int attackDamage = 1U;
-    unsigned int price = 0U;
-    bool instantAttack = false;
+    struct TowerProperties
+    {
+        TowerID id;
 
-    Tower(std::string const& spriteSheetSrc, utils::Vec2i spriteSize, float attackSpeedSec, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = 0);
-    Tower(std::string const& spriteSrc, float attackSpeedSec, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = 0);
+        float radiusPixel = 120.0f;
+        float attackRangePixel = 100.0f;
+        float attackSpeedSec = 1.0f;
+        unsigned int attackDamage = 1U;
+        bool instantAttack = false;
+        unsigned int price = 0U;
+
+        TowerProperties(TowerID id, float radius = 120.0f, float attackRange = 100.0f, float attackSpeed = 1.0f,
+            unsigned int attackDamage = 1U, bool instant = false, unsigned int price = 0U);
+
+    } properties;
+
+    Tower(TowerProperties const& props, std::string const& spriteSheetSrc, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = 0);
+    Tower(TowerProperties const& props, std::string const& spriteSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = 0);
     Tower(Tower const&);
     virtual ~Tower() = default;
 
@@ -31,6 +46,7 @@ public:
     virtual void attack();
     virtual bool lookForTarget(std::vector<Seal*> const& enemies);
     virtual void update(float dt) override;
+    void serialize(std::ostream& out) const override;
 
 //protected:
     Seal* target = nullptr;

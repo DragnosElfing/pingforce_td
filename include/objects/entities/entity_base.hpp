@@ -9,7 +9,7 @@
 
 namespace pftd {
 
-/*! Mindenféle "actor" ősosztálya: tornyok, fólák és lövedékek. */
+/*! Mindenféle "actor" ősosztálya: tornyok, fókák és lövedékek. */
 class Entity : public Object
 {
 public:

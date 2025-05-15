@@ -24,7 +24,7 @@ project "pingforce"
     }
 
     includedirs {
-        "include"
+        "." --"include"
     }
 
     externalincludedirs {
@@ -111,22 +111,23 @@ project "pingforce_test"
     targetname "test"
 
     files {
-        "test/tests.cpp",
+        "mock_*.cpp"
+        --[["test/tests.cpp",
         "src/utils/**/*.cpp",
-        "test/src/*.cpp"
+        "test/src/*.cpp"]]
     }
 
     includedirs {
-        "test/include"
+        "." --"test/include"
     }
 
     links {
         "asan"
     }
 
-    externalincludedirs {
+    --[[externalincludedirs {
         "include"
-    }
+    }]]
 
     sanitize {
         "address"

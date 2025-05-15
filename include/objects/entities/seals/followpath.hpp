@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CPORTA
+
 #include "utils/hetero_collection.hpp"
 
 namespace pftd {
@@ -16,3 +18,5 @@ struct FollowPath : public utils::Container<EndPoint>
 };
 
 }
+
+#endif

@@ -15,7 +15,7 @@ enum class TowerID
     ICICLE_STABBER
 };
 
-/*! Torony (pingvin). */
+/*! Torony (pingvin) ősosztály. */
 class Tower : public Entity, public utils::Serializable
 {
     using ProjSpawnFunc = std::function<void(Projectile*)>;

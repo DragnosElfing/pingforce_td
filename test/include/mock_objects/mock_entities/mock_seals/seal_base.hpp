@@ -9,10 +9,19 @@ namespace pftd_test
 
 using namespace pftd;
 
+enum class SealID
+{
+    REGULAR = 0,
+    CUB,
+    ZOMBIE,
+    FZC
+};
+
 /*! Fóka teszteléshez. */
-class Seal : public Entity
+class Seal : public Entity, public utils::Serializable
 {
 public:
+    SealID id;
     bool isCurrentlyStealing = false;
     int hp;
     float speed;
@@ -26,6 +35,12 @@ public:
     bool hasCompletedPath() const { return returned; }
     bool hasReachedNest() const { return reachedNest; }
     void damage(int hpLost = 1);
+    void serialize(std::ostream& out) const override;
+    void setLerpState(float param, bool backwards = false)
+    {
+        lerpParam = std::min(1.0f, std::max(param, 0.0f));
+        reachedNest = backwards;
+    }
 
 //protected:
     Seal(FollowPath const& followPath, std::string const& spriteSrc, utils::Vec2f const& size, int hp, float speed, unsigned int value, int zIndex = 0);

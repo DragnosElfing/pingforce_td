@@ -17,7 +17,7 @@ enum class SealID
     FZC
 };
 
-/*! Fóka. */
+/*! Fóka ősosztály. */
 class Seal : public Entity, public utils::Serializable
 {
 public:

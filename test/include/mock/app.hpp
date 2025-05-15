@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mock_objects/object_base.hpp"
-#include "scene.hpp"
+#include "mock/scene.hpp"
 
 namespace pftd_test {
 
@@ -14,14 +14,14 @@ public:
 
     Renderer(Renderer const&) = delete;
     Renderer(Renderer&&) = delete;
-    
+
     ~Renderer();
 
     void render();
-    void clear() const;
-    void display() const;
+    void clear() const { where(); };
+    void display() const { where(); };
     void pushQueue(Object const* o) { m_queue.push(o); }
-    void getWindow() const;
+    void getWindow() const { where(); };
 
 //private:
     unsigned int m_width;
@@ -41,7 +41,7 @@ public:
 
     void run();
     void addScene(std::string id, Scene* scene, bool active = false);
-    bool changeScene(std::string id);
+    bool changeScene(std::string id, Scene::StateFlag flag = Scene::StateFlag::NONE);
     auto isRunning() const { return this->m_running; }
     int getWindowWidth() const { return this->m_renderer->m_width; }
     int getWindowHeight() const { return this->m_renderer->m_height; }

@@ -10,16 +10,16 @@ SaveFileParser::SaveFileParser(std::string const& sourceFile):
 
 void SaveFileParser::parse()
 {
-    if(!this->isLabelValid()) return;
+    if(!this->isLabelValid()) {
+        throw ParseError{"Helytelen 'label'!"};
+    }
 
     this->_getStats();
-    while(true) {
+    while(!sourceStream.eof()) {
         this->_getEntity();
-        // Ha bármi miatt is ez nem sikerült, akkor be is fejezhettjük.
-        // Ha ill-formed, akkor legyen az: legyen nehéz értelmezni az ebből adódó hibaüzenetet. >:)
-        if(sourceStream.fail() || sourceStream.eof() || sourceStream.bad()) {
-            break;
-        }
+
+        // Hátha már a fájl végén vagyunk. Ekkor már a ciklusnak vége lesz.
+        this->peekAhead();
     }
 }
 
@@ -33,8 +33,17 @@ void SaveFileParser::_getStats()
 
 void SaveFileParser::_getEntity()
 {
-    auto typeString = this->get<std::string>();
-    if(sourceStream.eof()) return;
+    std::string typeString;
+    try {
+        typeString = this->get<std::string>();
+    } catch(ParseError& parseError) {
+        // Előfordulhat, hogy nincs is entitás mentve.
+        return;
+    }
+
+    if(sourceStream.eof()) {
+        throw ParseError{"Törzs nélküli entitás típus!"};
+    }
 
     EntityType type;
     if(typeString == "penguin") {

@@ -67,7 +67,6 @@ public:
             this->_skipWhitespace();
         }
 
-
         T got;
         sourceStream >> got;
         if (sourceStream.fail() || sourceStream.bad()) {
@@ -123,15 +122,33 @@ private:
 class LevelConfigParser final : public Parser
 {
 public:
+    /**
+    * @brief
+    *
+    * @param sourceFile A fájlnak az elérési útvonala, ahonnan a konfigot betöltjük.
+    */
     LevelConfigParser(std::string const& sourceFile);
     ~LevelConfigParser() = default;
 
     void parse() override;
+
+    /**
+    * @brief Mentett attribútum értékének kiolvasása.
+    *
+    * @param name Az attribútum neve.
+    * @return Az attribútum értéke (mindig egy array).
+    */
     std::vector<Vec2f> getAttribute(std::string name) const;
 
 private:
+    /*! Mentett [attribútum, érték] párok. */
     std::unordered_map<std::string, std::vector<Vec2f>> m_attribs;
 
+    /**
+    * @brief Következő attribútum beolvasása a konfigfájlból.
+    *
+    * @return A kapott attribútum neve.
+    */
     std::string _getAttribute();
 
 };
@@ -213,7 +230,14 @@ private:
     /*! A beolvasott entitás infók. */
     std::vector<EntityInfo> m_entities;
 
+    /**
+    * @brief Statisztika beolvasása a fájlból.
+    */
     void _getStats();
+
+    /**
+    * @brief Következ entitás beolvasása a fájlból.
+    */
     void _getEntity();
 };
 

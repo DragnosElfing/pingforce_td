@@ -17,9 +17,7 @@ public:
 
     Tower* clone() const override;
     void update(float dt) override;
-
-    void serialize(std::ostream& out) const override;
-    ;
+    
 };
 
 }

@@ -12,11 +12,12 @@ namespace pftd_test
 using namespace pftd;
 
 /*! Tesztelésre szánt "actor" ősosztály: tornyok, fólák és lövedékek. */
-class Entity : public Object, public utils::Serializable
+class Entity : public Object
 {
 public:
     bool isAnimated = true;
 
+    Entity(int texture, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex);
     Entity(std::string const& spriteSheetSrc, utils::Vec2i spriteSize, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = 0);
     Entity(std::string const& spriteSrc, utils::Vec2f const& position, utils::Vec2f const& size, int zIndex = 0);
     Entity(Entity const& other);
@@ -29,9 +30,11 @@ public:
     auto getPosition() const { return position; }
     gr::Sprite const* getSprite() const { return currentSprite; }
     gr::Sprite* getSprite() { return currentSprite; }
+    auto& getSpriteSheet() const { return spriteSheet; }
+    void resetAnimation();
 
 //protected:
-    //sf::Texture const& spriteSheet;
+    int spriteSheet;
     utils::Vec2i cellSize;
     size_t const CELL_N;
     size_t currentCell = 0U;

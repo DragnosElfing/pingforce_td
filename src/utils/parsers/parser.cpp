@@ -7,7 +7,7 @@ Parser::Parser(std::string const& sourceFile, std::string label):
     validLabel{label}
 {
     if(sourceStream.fail()) {
-        throw "Nem lehetett megnyitni a fájlt!";
+        throw ParseError{"Nem lehetett megnyitni a fájlt: " + sourceFile};
     }
 }
 

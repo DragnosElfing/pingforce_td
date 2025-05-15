@@ -2,8 +2,7 @@
 
 #include "mock_objects/mock_entities/mock_towers/tower_base.hpp"
 
-namespace pftd_test 
-{
+namespace pftd_test {
 
 using namespace pftd;
 
@@ -18,9 +17,6 @@ public:
     Tower* clone() const override;
     void update(float dt) override;
     void attack() override;
-
-    void serialize(std::ostream& out) const override;
-    ;
     
 };
 
