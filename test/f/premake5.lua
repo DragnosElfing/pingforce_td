@@ -57,7 +57,7 @@ project "pingforce"
             "vorbisfile",
             "ogg"
         }
-        
+
         filter "configurations:Release"
             links {
                 libs
@@ -111,7 +111,7 @@ project "pingforce_test"
     targetname "test"
 
     files {
-        "mock_*.cpp"
+        "*.cpp"
         --[["test/tests.cpp",
         "src/utils/**/*.cpp",
         "test/src/*.cpp"]]
@@ -131,6 +131,11 @@ project "pingforce_test"
 
     sanitize {
         "address"
+    }
+
+    buildoptions {
+        "-pedantic",
+        "-gdwarf-4"
     }
 
     defines {

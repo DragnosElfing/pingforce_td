@@ -57,7 +57,7 @@ project "pingforce"
             "vorbisfile",
             "ogg"
         }
-        
+
         filter "configurations:Release"
             links {
                 libs
@@ -120,16 +120,21 @@ project "pingforce_test"
         "test/include"
     }
 
-    links {
-        "asan"
-    }
+    -- links {
+    --     "asan"
+    -- }
 
     externalincludedirs {
         "include"
     }
 
-    sanitize {
-        "address"
+    -- sanitize {
+    --     "address"
+    -- }
+
+    buildoptions {
+        "-pedantic",
+        "-gdwarf-4"
     }
 
     defines {

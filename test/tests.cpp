@@ -216,7 +216,7 @@ int main()
     TEST(save_and_reset, level)
         using namespace utils::parser;
 
-        level = new Level{"test/f/level_save.dat", Level::Stats{3, 3, 0, 250}};
+        level = new Level{"test/f/level_save.dat"};
         // Teszteljük, mint a `functionality.parsers`-nél.
         EXPECT_EQ(4, level->config.getAttribute("followPath").size());
         EXPECT_EQ((Vec2f{68, -80}), level->config.getAttribute("followPath").at(0));

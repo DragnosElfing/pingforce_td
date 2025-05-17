@@ -32,22 +32,20 @@ public:
     /*! Játékállás / statisztika teszteléshez. */
     struct Stats : public utils::Serializable
     {
-        int maxHp = 3;
-        int hp = maxHp;
-        unsigned int score = 0U;
-        unsigned int money = 100U;
+        int maxHp;
+        int hp;
+        unsigned int score;
+        unsigned int money;
 
-        explicit Stats() = default;
-        explicit Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth);
+        explicit Stats(int maxHp = 3, int currentHp = 3, unsigned int score = 0U, unsigned int wealth = 100U);
 
         void serialize(std::ostream& out) const override;
     };
 
     Stats stats;
     Tower* selectedTower = nullptr;
-    
-    Level(std::string const& saveFile, Stats stats);
-    Level(std::string const& saveFile);
+
+    Level(std::string const& saveFile, std::string const& configFile = "test/f/valid_level.conf");
     virtual ~Level();
 
     virtual void loseHP(int hpLost = 1);
@@ -58,7 +56,8 @@ public:
     bool isGameOver() const { return stats.hp <= 0; };
     virtual void draw() const override;
     void save() const;
-    void reset(Stats stats);
+    void loadFromSave();
+    void reset(Stats stats = Stats{});
 
 //protected:
     Nest* nest = nullptr;

@@ -37,11 +37,10 @@ Nest* Nest::clone() const
 ///
 
 /// Level
-Level::Level(std::string const& saveFile, Stats stats):
+Level::Level(std::string const& saveFile, std::string const& configFile):
     Object{{}, {}},
 
-    stats{stats},
-    config{"test/f/valid_level.conf"},
+    config{configFile},
     saveFile{saveFile}
 {
     config.parse();
@@ -52,83 +51,6 @@ Level::Level(std::string const& saveFile, Stats stats):
         followPath.append(new utils::Vec2{x, y});
     }
     followPath.append(new utils::Vec2{nest->getPosition()});
-}
-
-Level::Level(std::string const& saveFile):
-    Object{{}, {}},
-
-    config{"test/f/valid_level.conf"},
-    saveFile{saveFile}
-{
-    // Először a konfig ...
-    config.parse();
-    nest = new Nest{config.getAttribute("nestPosition")[0]};
-    for(auto& [x, y] : config.getAttribute("followPath")) {
-        followPath.append(new utils::Vec2{x, y});
-    }
-
-    // ... Utánna a mentett állás.
-    utils::parser::SaveFileParser saveFileP {saveFile};
-    try {
-        saveFileP.parse();
-    } catch(utils::parser::ParseError err) {
-        print(err.what());
-    }
-
-    auto sInf = saveFileP.getStats();
-    stats = Stats{sInf.maxHp, sInf.maxHp, sInf.score, sInf.wealth};
-    this->loseHP(stats.maxHp - sInf.hp);
-
-    for(auto const& eInf : saveFileP.getEntities()) {
-        switch(eInf.entityType) {
-        case utils::parser::SaveFileParser::EntityType::TOWER:
-            switch(eInf.towerID) {
-            case static_cast<int>(TowerID::SNOWBALLER):
-                towers.push_back(new Snowballer{eInf.position});
-                break;
-            case static_cast<int>(TowerID::ICICLE_STABBER):
-                towers.push_back(new IcicleStabber{eInf.position});
-                break;
-            default: break;
-            }
-
-            towers.back()->setProjSpawnCb([this](Projectile* projectile){
-                projectiles.push_back(std::move(projectile));
-            });
-
-            break;
-        case utils::parser::SaveFileParser::EntityType::SEAL:
-            switch(eInf.seal.sealID) {
-            case static_cast<int>(SealID::REGULAR):
-                seals.push_back(new RegularSeal{followPath});
-                break;
-            case static_cast<int>(SealID::ZOMBIE):
-                seals.push_back(new ZombieSeal{followPath});
-                break;
-            case static_cast<int>(SealID::CUB):
-                seals.push_back(new Cub{followPath});
-                break;
-            case static_cast<int>(SealID::FZC):
-                seals.push_back(new FZC{followPath});
-                break;
-            default: break;
-            }
-
-            seals.back()->setLerpState(eInf.seal.lerpParam, eInf.seal.goingBackwards);
-
-            break;
-        case utils::parser::SaveFileParser::EntityType::PROJECTILE:
-            switch(eInf.proj.projID) {
-            case static_cast<int>(ProjectileID::SNOWBALL):
-                projectiles.push_back(new Snowball{eInf.position, eInf.proj.direction, eInf.proj.speed});
-                break;
-            default: break;
-            }
-
-            break;
-        default: break;
-        }
-    }
 }
 
 Level::~Level()
@@ -168,6 +90,75 @@ void Level::reset(Stats stats)
         delete proj;
     }
     projectiles.clear();
+}
+
+void Level::loadFromSave()
+{
+    this->reset();
+
+    utils::parser::SaveFileParser saveFileP {saveFile};
+    try {
+        saveFileP.parse();
+    } catch(utils::parser::ParseError err) {
+        print(err.what());
+    }
+
+    auto sInf = saveFileP.getStats();
+    stats = Stats{sInf.maxHp, sInf.maxHp, sInf.score, sInf.wealth};
+    this->loseHP(stats.maxHp - sInf.hp);
+
+    for(auto const& eInf : saveFileP.getEntities()) {
+        switch(eInf.entityType) {
+        case utils::parser::SaveFileParser::EntityType::TOWER:
+            switch(eInf.towerID) {
+            case static_cast<int>(TowerID::SNOWBALLER):
+                towers.push_back(new Snowballer{eInf.position});
+                break;
+            case static_cast<int>(TowerID::ICICLE_STABBER):
+                towers.push_back(new IcicleStabber{eInf.position});
+                break;
+            default: break;
+            }
+
+            towers.back()->setProjSpawnCb([this](Projectile* projectile){
+                projectiles.push_back(std::move(projectile));
+            });
+
+            break;
+
+        case utils::parser::SaveFileParser::EntityType::SEAL:
+            switch(eInf.seal.sealID) {
+            case static_cast<int>(SealID::REGULAR):
+                seals.push_back(new RegularSeal{followPath});
+                break;
+            case static_cast<int>(SealID::ZOMBIE):
+                seals.push_back(new ZombieSeal{followPath});
+                break;
+            case static_cast<int>(SealID::CUB):
+                seals.push_back(new Cub{followPath});
+                break;
+            case static_cast<int>(SealID::FZC):
+                seals.push_back(new FZC{followPath});
+                break;
+            default: break;
+            }
+
+            seals.back()->setLerpState(eInf.seal.lerpParam, eInf.seal.goingBackwards);
+
+            break;
+
+        case utils::parser::SaveFileParser::EntityType::PROJECTILE:
+            switch(eInf.proj.projID) {
+            case static_cast<int>(ProjectileID::SNOWBALL):
+                projectiles.push_back(new Snowball{eInf.position, eInf.proj.direction, eInf.proj.speed});
+                break;
+            default: break;
+            }
+
+            break;
+        default: break;
+        }
+    }
 }
 
 void Level::loseHP(int hpLost)

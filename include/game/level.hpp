@@ -39,45 +39,46 @@ public:
     struct Stats : public utils::Serializable
     {
         /*! A maximum HP. */
-        int maxHp = 3;
+        int maxHp;
 
         /*! Jelenlegi HP. */
-        int hp = maxHp;
+        int hp;
 
         /*! Pontszám. */
-        unsigned int score = 0U;
+        unsigned int score;
 
         /*! Pénz. */
-        unsigned int money = 100U;
+        unsigned int money;
 
-        explicit Stats() = default;
-        explicit Stats(int maxHp, int currentHp, unsigned int score, unsigned int wealth);
+        explicit Stats(int maxHp = 3, int currentHp = 3, unsigned int score = 0U, unsigned int wealth = 100U);
 
         void serialize(std::ostream& out) const override;
     };
 
     /*! Játékos statisztika. */
-    Stats stats = Stats{};
+    Stats stats;
 
     /*! Lehelyezni kívánt torony. */
     Tower* selectedTower = nullptr;
 
-    /**
-    * @brief
-    *
-    * @param saveFile Mentésfájl elérési útvonala.
-    * @param stats Kezdeti játékállás.
-    */
-    Level(std::string const& saveFile, Stats stats);
+    Level(std::string const& saveFile, std::string const& configFile = "res/data/level.conf");
 
-    /**
-    * @brief
-    *
-    * Ilyenkor a játékállást is a mentésfájlból olvassa vissza.
-    *
-    * @param saveFile Mentésfájl elérési útvonala.
-    */
-    Level(std::string const& saveFile);
+    // /**
+    // * @brief
+    // *
+    // * @param saveFile Mentésfájl elérési útvonala.
+    // * @param stats Kezdeti játékállás.
+    // */
+    // Level(std::string const& saveFile, Stats stats);
+
+    // /**
+    // * @brief
+    // *
+    // * Ilyenkor a játékállást is a mentésfájlból olvassa vissza.
+    // *
+    // * @param saveFile Mentésfájl elérési útvonala.
+    // */
+    // Level(std::string const& saveFile);
 
     virtual ~Level();
 
@@ -131,11 +132,16 @@ public:
     void save() const;
 
     /**
+    * @brief Betölti a mentett játékállást.
+    */
+    void loadFromSave();
+
+    /**
     * @brief Játék újraindítása.
     *
     * "Object Pool" nem használata miatt van.
     */
-    void reset(Stats stats);
+    void reset(Stats stats = Stats{});
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 

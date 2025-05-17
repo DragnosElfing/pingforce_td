@@ -156,8 +156,12 @@ void GameScene::Inventory::draw(sf::RenderTarget& target, sf::RenderStates state
 ///
 
 /// Game
-GameScene::GameScene()
+GameScene::GameScene():
+    m_level{new Level{GameScene::SAVE_FILE_PATH}}
 {
+    // Level
+    objects.push_back(m_level);
+
     // Háttér
     objects.push_back(new gr::Sprite{"res/images/map.png", {0, 0}, {WIN_WIDTH - 180, WIN_HEIGHT}, -100});
 
@@ -269,28 +273,11 @@ void GameScene::_constructInventory()
 
 void GameScene::startGame()
 {
-    // Egy ObjectPool ezt a problémát megoldaná, de már nem lesz tovább komplikálva.
-    // Így kissé "gagyin" néz ki, de helyesen működik.
-    bool firstTime = !m_level;
-    if(!firstTime) {
-        if(m_shouldLoadSaved) {
-            m_shouldLoadSaved = false;
-        } else {
-            Level::Stats defStats {3, 3, 0, 250};
-            m_level->reset(defStats);
-        }
+    if(m_shouldLoadSaved) {
+        m_level->loadFromSave();
+        m_shouldLoadSaved = false;
     } else {
-        if(m_shouldLoadSaved) {
-            m_level = new Level{GameScene::SAVE_FILE_PATH};
-            m_shouldLoadSaved = false;
-        } else {
-            Level::Stats defStats {3, 3, 0, 250};
-            m_level = new Level{GameScene::SAVE_FILE_PATH, defStats};
-        }
-    }
-
-    if(firstTime) {
-        objects.push_back(m_level);
+        m_level->reset();
     }
 
     this->_constructInventory();
